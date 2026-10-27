@@ -663,16 +663,15 @@ alerts** on the dashboard returns to 0.
 ## 5 End-to-end automated remediation (orchestration with Apache Airflow)
 
 In the first two parts, a person repaired the pipeline: you edited the feed,
-and you corrected the SQL statement. In this part, an AI agent does the
-repair, from the alert to the deployed fix, and you review its work.
+and you corrected the SQL statement. In this part, an AI agent, **IBM Bob**,
+does the repair, from the alert to the deployed fix, and you review its work.
 
 This part also takes observability beyond the platform. Not every pipeline
 runs on watsonx.data integration. The Summit Outfitters data team runs
 **marketplace_settlements_daily** in its own Apache Airflow environment, on a
 server outside the platform. The pipeline reports each run to Data
 Observability, with the number of rows that it loaded, so it appears next to
-the platform's own jobs, with the same alerts, the same receivers and the
-same coverage figure.
+the platform's own jobs, with the same alerts and the same coverage figure.
 
 Every night, the pipeline reads the previous day's sales from TrailMart's
 partner API, page by page, and loads them into the table behind the daily
@@ -680,169 +679,164 @@ revenue report. On a normal night, it loads about 1,200 settlements. Last
 night, TrailMart changed how its API pages through results. The pipeline
 still reads the first page, finds no sign of a second page, and finishes
 successfully. A run that loads 100 settlements instead of 1,200 is green in
-Airflow. In this part, you detect the problem with a metric alert that
-compares each run with a baseline, and an AI agent identifies the cause and
-repairs the pipeline.
+Airflow.
 
-### 5.1 Create a metric alert for the pipeline
+!!! note "One shared environment for this part"
+    In this part, everyone works on the data team's shared Airflow server
+    and the shared watsonx project of the lab, not on your own environment.
+    The alert **Lab marketplace settlements incomplete** is already defined
+    there: it compares `rows_loaded` of each run with a baseline of 1,000
+    settlements and triggers when a run deviates by more than 40%. The
+    instructor gives you the API key that connects IBM Bob to that project.
 
-A fixed threshold worked for the ingestion feed, whose error rate must stay
-at 0. The number of settlements varies from night to night, so this alert
-compares each run with a **baseline** instead: a normal night loads about
-1,000 settlements or more, and a deviation of more than 40% from that
-baseline is not a normal night.
+!!! info "How the agent sees what you see"
+    Data Observability publishes its alerts, job runs and metrics through an
+    **MCP server**. IBM Bob connects to it with the API key, and reads the
+    same information that you reviewed in the first two parts: the alert,
+    the run that triggered it and the value of `rows_loaded`. The data team
+    gives Bob a **mode**, a set of instructions and permissions that turns
+    it into the team's on-call engineer: read the alert, find the cause in
+    the pipeline repository, propose the change, deploy it through the
+    team's release procedure, and verify the re-run.
 
-1. In Data Observability, click **New alert**.
+### 5.1 Run tonight's load
 
-2. Click **Metric** (A), and then click **Next** (B).
-
-3. Click **Find a workspace** and select your project.
-
-4. Under **Asset**, click **Select asset**.
-
-5. Click **marketplace_settlements_daily** (A). Select **rows_loaded** (B).
-   Its latest value is about 1,200: the number of settlements that the last
-   nightly run loaded. Click **Add assets** (C).
-
-    ![The rows_loaded metric](../assets/screens/dobs/v2-5-2e-pick-metric.png){ .screenshot }
-
-6. Click **Next**.
-
-7. Click **Percent deviation** (A). In **Metric baseline value**, replace the
-   value with `1000` (B). In the **Percent deviation** box, replace the value
-   with `40` (C). The message below the fields states the resulting range,
-   600 to 1,400 rows, and how many of the previous runs fall outside it.
-   Click **Next** (D).
-
-    ![A 40% deviation from 1,000 rows](../assets/screens/dobs/v4-5-2h-condition.png){ .screenshot }
-
-8. Click **Critical** (A). In **Name**, type
-   `Lab - Marketplace settlements incomplete` (B). Ignore the message about
-   the name length. Click **Next** (C).
-
-    ![Severity and name](../assets/screens/dobs/v2-5-2i-details.png){ .screenshot }
-
-9. Expand **Custom webhook** (A), select **Lab - alert viewer** (B), and then
-   click **Create** (C).
-
-    ![Send the alert to the on-call channel](../assets/screens/dobs/v4-5-2j-receivers.png){ .screenshot }
-
-**Check your progress:** the **Defined alerts** tab lists three lab alerts.
-
-![Three lab alerts defined](../assets/screens/dobs/v4-5-2k-defined.png){ .screenshot }
-
-### 5.2 Open Airflow
-
-Data Observability links every observed job to the system that runs it. You
-open the Airflow environment from the alert that you just defined.
-
-1. On the **Defined alerts** tab, click **Lab - Marketplace settlements
-   incomplete**. The alert details open.
-
-    ![The defined alert](../assets/screens/dobs/v4-5-1a-defined-row.png){ .screenshot }
-
-2. Under **Asset details**, click the job name
-   **Marketplace_settlements_daily**. Airflow opens in a new tab.
-
-    ![The job links to Airflow](../assets/screens/dobs/v4-5-1b-airflow-link.png){ .screenshot }
-
-3. On the Airflow **Sign In** page, type `admin` in **Username** (A) and
-   `IBMDem0s1` in **Password** (B). Click **Sign In** (C).
+1. Open <https://163.66.91.133/airflow>. If the browser warns about the
+   certificate, continue to the site. On the **Sign In** page, type `admin`
+   in **Username** (A) and `IBMDem0s1` in **Password** (B). Click **Sign In**
+   (C).
 
     ![Sign in to Airflow](../assets/screens/dobs/5-1c-signin.png){ .screenshot }
 
-4. Click **marketplace_settlements_daily**. The **Grid** view shows the runs
-   of the previous nights. Every run is green, and each night loaded more than
-   1,100 settlements.
+2. Click **marketplace_settlements_daily**. The **Grid** view shows the runs
+   of the previous nights, all green.
 
     ![The marketplace pipeline's history](../assets/screens/dobs/v2-5-1d-history.png){ .screenshot }
 
-**Check your progress:** every run in the grid is green. Do not change the
-other DAGs in the list.
-
-### 5.3 Run tonight's load
-
-1. In Airflow, on the **marketplace_settlements_daily** page, click the
-   **Trigger DAG** icon, a play button in the upper-right corner. A banner
-   shows **Triggered marketplace_settlements_daily with new Run ID**.
+3. Click the **Trigger DAG** icon, a play button in the upper-right corner.
+   A banner shows **Triggered marketplace_settlements_daily with new Run
+   ID**.
 
     ![Trigger the load](../assets/screens/dobs/v2-5-3a-trigger.png){ .screenshot }
 
-2. Wait about 30 seconds. The new run and all of its tasks turn green.
+4. Wait about 30 seconds. The new run and all of its tasks turn green.
 
     ![The run succeeded](../assets/screens/dobs/v2-5-3b-green.png){ .screenshot }
 
 **Check your progress:** in Airflow, the run is successful. Nothing on this
-page indicates a problem.
+page indicates a problem. Within about a minute, Data Observability raises
+the alert on this run, because it loaded 100 settlements instead of about
+1,200. You do not need to open the alert yourself: the agent reads it.
 
-### 5.4 Review the alert
+### 5.2 Open IBM Bob
 
-1. Wait about 2 minutes, and then switch to the on-call channel tab. The
-   alert **Lab - Marketplace settlements incomplete** appears with the
-   trigger value **100 rows_loaded**.
+IBM Bob is installed on the Windows workstation of your environment.
 
-    ![The alert in the on-call channel](../assets/screens/dobs/v4-5-4a-channel-alert.png){ .screenshot }
+1. On your TechZone reservation page, open the Windows workstation
+   (the **Management Console** link). Sign in with the Windows credentials
+   on the same page.
 
-2. Switch to the watsonx tab. In Data Observability, click **Triggered
-   alerts**, and then click **Lab - Marketplace settlements incomplete**. The
-   trigger value reads **100 rows loaded (-90% from baseline)**: the run
-   succeeded and loaded 100 settlements, compared with about 1,200 on each of
-   the previous nights. Click **Acknowledge**.
+2. On the Windows desktop, open **IBM Bob**. Sign in with your IBMid when
+   Bob asks for it.
 
-    ![The triggered alert](../assets/screens/dobs/v4-5-4b-triggered.png){ .screenshot }
+**Check your progress:** IBM Bob opens with its welcome page and the chat
+panel.
 
-**Check your progress:** a successful run triggered an alert. An alert on the
-job status alone would never have detected this problem.
+### 5.3 Open the pipeline repository
 
-### 5.5 Hand the incident to an AI agent
+The data team keeps the pipeline in a git repository. You open the team's
+copy in Bob; the repository also carries the team's Bob configuration.
 
-!!! info "How the agent sees what you see"
-    Data Observability publishes its alerts, job runs and metrics through an
-    **MCP server**. An AI agent that connects to it reads the same
-    information that you reviewed: the alert, the run history of the pipeline
-    and the values of `rows_loaded`. The Summit Outfitters data team uses
-    **IBM Bob**, run as a headless agent, to triage the incidents that reach
-    the on-call channel. With the information from Data Observability, the
-    agent investigates the cause and proposes a fix as a pull request for a
-    person to review.
+1. In Bob, open the command palette with ++ctrl+shift+p++, type `Git: Clone`
+   and press ++enter++. Paste the repository URL and press ++enter++:
 
-!!! note "A recorded session"
-    In this lab, the agent's work is a replay of a recorded IBM Bob session,
-    filled in with the values of your alert. It does not change your
-    environment.
+    ```
+    https://github.com/aminabougallala/summit-marketplace-pipeline
+    ```
 
-1. In the on-call channel tab, on the card **Lab - Marketplace settlements
-   incomplete**, click **Investigate with IBM Bob**.
+    Choose a folder for the clone, for example `Documents`, and click
+    **Open** when Bob offers to open the cloned repository.
 
-    ![Investigate with IBM Bob](../assets/screens/dobs/v4-5-5a-investigate.png){ .screenshot }
+    If Bob reports that git is not installed, open
+    <https://github.com/aminabougallala/summit-marketplace-pipeline> in the
+    browser instead, click **Code** → **Download ZIP**, extract the ZIP, and
+    open the extracted folder in Bob with **File** → **Open Folder**. The
+    on-call mode offers to install git for you in the next section.
 
-2. Follow the session as it runs. Through the MCP server, the agent reads the
-   alert, compares `rows_loaded` with the previous runs, reads the task log,
-   calls TrailMart's API, and identifies the cause: TrailMart now pages its
-   results with a cursor, and the pipeline stops after the first page.
+2. In the Explorer, confirm that the folder contains `dags/`, `docs/` and
+   `.bob/`.
 
-    ![The agent's investigation](../assets/screens/dobs/v4-5-5b-session.png){ .screenshot }
+**Check your progress:** the file `dags/marketplace_settlements_daily.py` is
+in the Explorer, and the mode selector at the bottom of the chat panel
+offers **Summit on-call engineer**.
 
-3. Review the pull request that the agent opened. The change follows
-   TrailMart's cursor to the last page, and it fails the task when fewer rows
-   arrive than TrailMart reports, so that a partial load can never again
-   finish successfully.
+### 5.4 Connect Bob to Data Observability
 
-    ![The pull request](../assets/screens/dobs/v4-5-5c-pull-request.png){ .screenshot }
+1. In Bob, open **Settings** → **MCP Servers** → **Edit Project MCP**. The
+   file `.bob/mcp.json` opens. It declares the server
+   **ibm-agentic-data-integration**.
 
-4. Click **Merge and deploy**. The session deploys the fix, runs the load
-   again, and reports 1,216 settlements loaded.
+2. Replace `PASTE_LAB_API_KEY` with the API key from your instructor, so
+   that the line reads `"Authorization": "ApiKey <the key>"`. Save the file.
 
-    ![Deployed and resolved](../assets/screens/dobs/v4-5-5d-resolved.png){ .screenshot }
+3. In the MCP Servers list, confirm that **ibm-agentic-data-integration**
+   shows a green status and its tools.
 
-5. In Data Observability, open **Lab - Marketplace settlements incomplete**
-   and click **Mark Resolved**.
+**Check your progress:** the server is connected. If it shows an error,
+check that the key is pasted without spaces and that the word `ApiKey` and
+one space precede it.
 
-**Check your progress:** on the **Dashboard**, **Open alerts** shows 0, and
-**Observability coverage** has increased, because all three of your pipelines
-are now observed.
+### 5.5 Hand the incident to the agent
 
-![The dashboard at the end of the lab](../assets/screens/dobs/v4-5-5e-dashboard.png){ .screenshot }
+1. In the chat panel, open the mode selector at the bottom and select
+   **Summit on-call engineer**.
+
+2. Paste the following prompt and press ++enter++:
+
+    ```
+    An alert fired on marketplace_settlements_daily. Handle the incident: read the alert, find the cause, propose the fix for my review, deploy it and verify the re-run.
+    ```
+
+3. Follow the agent. It first checks its connection and whether git is
+   installed, and offers to install git if it is missing. Approve the
+   commands and file changes that it proposes. In order, the agent:
+
+    - reads the alert through the MCP server and reports the trigger value:
+      100 rows loaded, 90% below the baseline;
+    - reads the loader in `dags/marketplace_settlements_daily.py`,
+      TrailMart's API change log in `docs/trailmart-partner-api.md` and the
+      run's log on Airflow, and states the cause: TrailMart now pages with a
+      cursor, and the loader stops after the first page because
+      `total_pages` is no longer returned;
+    - proposes the change to `fetch_settlements`, follows the cursor to the
+      last page and fails the run when fewer rows arrive than TrailMart
+      reports. Review the diff and approve it;
+    - commits the change on the branch `fix/trailmart-cursor-paging`. The
+      repository is read-only for the lab, so the commit stays on your
+      workstation; in your own team, the next step is a pull request;
+    - deploys the change with the team's release procedure: it triggers the
+      pipeline through Airflow's API with the paging strategy that matches
+      the fix;
+    - polls the run, reads its log and reports the result.
+
+**Check your progress:** the agent reports a successful run that loaded
+about 1,200 settlements from 13 pages, and closes with a four-line incident
+summary. In Airflow, the latest run of **marketplace_settlements_daily** is
+green and its log contains `loaded ... settlements for ... from 13 page(s)`.
+
+### 5.6 Review the outcome
+
+1. In the watsonx tab, in Data Observability, click **Triggered alerts** and
+   open **Lab marketplace settlements incomplete**. The alert is still open:
+   the on-call lead closes it after the review, and in this lab everyone
+   shares it, so leave it open.
+
+2. Click the **Dashboard** tab. The pipeline outside the platform is counted
+   in **Observability coverage** next to your streaming and batch jobs.
+
+**Check your progress:** on the **Dashboard**, **Observability coverage**
+includes all three kinds of pipelines, and the agent's run appears under
+the job with `rows_loaded` back in range.
 
 ## 6 Summary
 
@@ -864,9 +858,10 @@ the log and the flow and named the renamed column, so that the person who
 received the alert also received the diagnosis.
 
 **End-to-end automated remediation.** For the pipeline outside the platform,
-an AI agent used Data Observability's MCP server to read the alert and the run
-history, found the API change, proposed a tested fix, and deployed it after
-your review.
+IBM Bob, running as the data team's on-call engineer, read the alert and
+the run through Data Observability's MCP server, found the API change in
+the pipeline repository, proposed the fix for your review, deployed it and
+verified the re-run.
 
 **One view across environments.** A streaming job, a batch job and an Apache
 Airflow pipeline on a server outside the platform report to one place. They
