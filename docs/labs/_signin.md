@@ -11,7 +11,9 @@ need: the identifier of your environment and the user names and passwords.
 
     ![The identifier on the reservation page](../assets/screens/signin/signin-1-techzone-link.png){ .screenshot }
 
-2. In a new browser tab, open <https://ca-tor.dai.cloud.ibm.com/df/home?context=df>.
+2. Copy the link <https://ca-tor.dai.cloud.ibm.com/df/home?context=df>
+   (right-click it and select **Copy link address**), and paste it into a new
+   tab of the browser on your main screen.
    The page **Log in to IBM watsonx** opens.
 
 3. Under **Work with resources in this IBM Cloud region**, select **Toronto

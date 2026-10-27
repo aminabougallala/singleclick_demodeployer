@@ -78,6 +78,10 @@ the fix.
     steps return to tabs that you opened earlier. Do not close a tab unless a
     step tells you to.
 
+    **Opening links.** To open a link from this guide, right-click it,
+    select **Copy link address**, and paste it into a new tab of the browser
+    on your main screen.
+
     **How to read the screenshots.** A red box or a red arrow marks the
     element to click. When one screen needs several actions, the letters
     **A**, **B** and **C** give their order. Names and numbers in the
@@ -157,7 +161,9 @@ already exists in Data Observability under the name **Lab - alert viewer**.
 You do not create a receiver in this lab. You only select **Lab - alert
 viewer** when you create an alert.
 
-1. Open <https://alert-webhook.23ij0n2ztu5p.ca-tor.codeengine.appdomain.cloud/>.
+1. Copy the following link and paste it into a new tab of the browser on
+   your main screen:
+   <https://alert-webhook.23ij0n2ztu5p.ca-tor.codeengine.appdomain.cloud/>
 
 2. In the account box, type the name of your TechZone account, for example
    `itz-saas-351` (A). The name is in the top bar of the watsonx tab. Click
@@ -687,7 +693,7 @@ Airflow.
     The alert **Lab marketplace settlements incomplete** is already defined
     there: it compares `rows_loaded` of each run with a baseline of 1,000
     settlements and triggers when a run deviates by more than 40%. IBM
-    Bob connects to that project with the lab API key in section 5.4.
+    Bob connects to that project with the lab API key in the configuration of section 5.4.
 
 !!! info "How the agent sees what you see"
     Data Observability publishes its alerts, job runs and metrics through an
@@ -701,7 +707,8 @@ Airflow.
 
 ### 5.1 Run tonight's load
 
-1. Open <https://163.66.91.133/airflow>. If the browser warns about the
+1. Copy the link <https://163.66.91.133/airflow> and paste it into a new
+   tab of the browser on your main screen. If the browser warns about the
    certificate, continue to the site. On the **Sign In** page, type `admin`
    in **Username** (A) and `IBMDem0s1` in **Password** (B). Click **Sign In**
    (C).
@@ -728,80 +735,163 @@ page indicates a problem. Within about a minute, Data Observability raises
 the alert on this run, because it loaded 100 settlements instead of about
 1,200. You do not need to open the alert yourself: the agent reads it.
 
-### 5.2 Open IBM Bob
+### 5.2 Download the pipeline repository
+
+The data team keeps the pipeline in a git repository on GitHub. You download
+a copy of it to the workstation; the repository also carries the team's IBM
+Bob mode.
+
+1. Copy the following link (right-click it and select **Copy link
+   address**), and paste it into a new tab of the browser on your main
+   screen: <https://github.com/aminabougallala/summit-marketplace-pipeline>
+
+2. On the repository page, click **Code** (A), and then click **Download
+   ZIP** (B). The browser saves `summit-marketplace-pipeline-main.zip` in
+   your **Downloads** folder.
+
+    ![Download the repository as a ZIP](../assets/screens/dobs/v5-3-1-download-zip.png){ .screenshot }
+
+3. Open **File Explorer** and go to the **Downloads** folder. Right-click
+   `summit-marketplace-pipeline-main.zip`, select **Extract All...**, and
+   click **Extract**. Windows creates the folder
+   `summit-marketplace-pipeline-main`, which contains `.bob`, `dags`,
+   `docs` and `README.md`.
+
+**Check your progress:** the folder
+`Downloads\summit-marketplace-pipeline-main\summit-marketplace-pipeline-main`
+(or `Downloads\summit-marketplace-pipeline-main`, depending on Windows)
+contains the folders `.bob`, `dags` and `docs`.
+
+### 5.3 Open the repository in IBM Bob
 
 IBM Bob is installed on the Windows workstation at your seat.
 
 1. On the Windows desktop, open **IBM Bob** from the Start menu.
 
-2. Sign in with your IBMid when Bob asks for it. If you do not have an
-   IBMid, create one at <https://myibm.ibm.com> with any e-mail address;
-   it takes about two minutes.
+2. Click the **Explorer** icon at the top of the bar on the left (A), and
+   then click **Open Folder** (B).
 
-**Check your progress:** IBM Bob opens with its welcome page and the chat
-panel.
+    ![Open Folder from the Explorer](../assets/screens/dobs/v5-3-2-open-folder.png){ .screenshot }
 
-### 5.3 Open the pipeline repository
+3. Select the extracted folder `summit-marketplace-pipeline-main` (the one
+   that contains `.bob`, `dags` and `docs`), and click **Select Folder**.
 
-The data team keeps the pipeline in a git repository. You open the team's
-copy in Bob; the repository also carries the team's Bob configuration.
+4. The folder opens in **Restricted Mode**. In the banner at the top,
+   click **Manage**.
 
-1. On Bob's **Welcome** page, under **Start**, click **Clone Git
-   Repository...**. Paste the repository URL and press ++enter++:
+    ![Manage in the Restricted Mode banner](../assets/screens/dobs/v5-3-3a-manage.png){ .screenshot }
 
-    ```
-    https://github.com/aminabougallala/summit-marketplace-pipeline
-    ```
+5. In **Workspace Trust**, click **Trust**. The banner disappears.
 
-    Choose a folder for the clone, for example `Documents`, and click
-    **Open** when Bob offers to open the cloned repository. If Bob asks
-    whether you trust the authors of the folder, click **Yes, I trust the
-    authors**.
+    ![Trust the folder](../assets/screens/dobs/v5-3-3b-trust.png){ .screenshot }
 
-    If Bob reports that git is not installed, open
-    <https://github.com/aminabougallala/summit-marketplace-pipeline> in the
-    browser instead, click **Code** → **Download ZIP**, extract the ZIP, and
-    open the extracted folder in Bob with **File** → **Open Folder**. The
-    on-call mode offers to install git for you in section 5.5.
+    If Bob instead asks whether you trust the authors of the files in this
+    folder, click **Yes, I trust the authors**.
 
-2. In the Explorer, confirm that the folder contains `.bob`, `dags`, `docs`
-   and `README.md`.
+6. In the **IBM Bob** panel on the right, click **Sign in** and sign in with
+   your IBMid. If you do not have an IBMid, create one at
+   <https://myibm.ibm.com> with any e-mail address; it takes about two
+   minutes.
 
-    ![The repository open in Bob](../assets/screens/dobs/bob-5-3-repo-open.png){ .screenshot }
+**Check your progress:** the Explorer lists `.bob`, `dags`, `docs` and
+`README.md`, no **Restricted Mode** banner is shown, and the Bob panel on the
+right shows **Hi, I'm Bob** with an empty task box.
 
-**Check your progress:** the Explorer lists `dags/marketplace_settlements_daily.py`,
-and the Bob panel on the right shows **Hi, I'm Bob** with an empty task box.
+![The repository open in Bob](../assets/screens/dobs/bob-5-3-repo-open.png){ .screenshot }
 
 ### 5.4 Connect Bob to Data Observability
 
-1. In the Explorer, expand `.bob` and open `mcp.json`. It declares the MCP
-   server **ibm-agentic-data-integration**.
+Bob reads the alert through the Data Observability MCP server. You add the
+server to Bob's global configuration, with the lab API key already in it.
 
-2. Replace `PASTE_LAB_API_KEY` with the lab API key below, so that the line
-   reads `"Authorization": "ApiKey 8z5NSbE6McSHUQCHtjojBLzMoQ2ZjX0exBJgNh4lfOwI"`.
-   Save the file with ++ctrl+s++.
+1. In the Bob panel, click the **Settings** (gear) icon at the top (A). In
+   the settings, click **MCP** (B), and then click the **+** icon above the
+   list of servers (C).
 
+    ![Settings, MCP, add a server](../assets/screens/dobs/v5-4-1-mcp-add.png){ .screenshot }
+
+2. In **Add MCP Server**, open **Configuration Scope** and select **Global**
+   (A). Click **Open Configuration File** (B). The global file `mcp.json`
+   opens in the editor.
+
+    ![Global scope, Open Configuration File](../assets/screens/dobs/v5-4-2-global-scope.png){ .screenshot }
+
+3. Select everything in the file (++ctrl+a++), replace it with the following
+   configuration, and save the file (++ctrl+s++). The configuration already
+   contains the lab API key. If the file lists other servers that you want
+   to keep, paste only the `"ibm-agentic-data-integration"` entry inside
+   `"mcpServers"` instead.
+
+    ```json
+    {
+      "mcpServers": {
+        "ibm-agentic-data-integration": {
+          "type": "streamable-http",
+          "url": "https://api.ca-tor.dai.cloud.ibm.com/data_intg_ai/v1/mcp",
+          "headers": {
+            "Authorization": "ApiKey 8z5NSbE6McSHUQCHtjojBLzMoQ2ZjX0exBJgNh4lfOwI"
+          },
+          "timeout": 120000,
+          "disabled": false,
+          "alwaysAllow": [
+            "get_session_info",
+            "get_projects",
+            "get_alert",
+            "list_alerts",
+            "get_alerts_summary",
+            "list_alert_definitions",
+            "list_jobs",
+            "list_job_runs",
+            "get_job_run_details",
+            "get_job_run_logs"
+          ]
+        }
+      }
+    }
     ```
-    8z5NSbE6McSHUQCHtjojBLzMoQ2ZjX0exBJgNh4lfOwI
-    ```
 
-3. In the Bob panel, click the **Settings** (gear) icon at the top, and
-   then click **MCP** in the list on the left. The server
-   **ibm-agentic-data-integration** with the scope **Workspace** shows the
-   status **Connected**.
+4. Return to the **Bob Settings** tab. In the MCP list, the server
+   **ibm-agentic-data-integration** with the scope **Global** shows the
+   status **Connected**. If it does not appear yet, click the refresh icon
+   above the list.
 
-    ![The MCP server is connected](../assets/screens/dobs/bob-5-4-mcp-connected.png){ .screenshot }
+    ![The MCP server is connected](../assets/screens/dobs/v5-4-4-connected.png){ .screenshot }
 
-**Check your progress:** the status is **Connected**. If it shows an error,
-check that the key is pasted without spaces and that the word `ApiKey` and
-one space precede it, save the file again, and click the refresh icon above
-the list.
+**Check your progress:** **ibm-agentic-data-integration** is **Connected**.
 
-### 5.5 Hand the incident to the agent
+### 5.5 Import the on-call mode
+
+A **mode** is a set of instructions and permissions that tailors Bob for a
+job. The data team's mode, **Summit on-call engineer**, is in the
+repository's `.bob` folder.
+
+1. In **Bob Settings**, click **Modes** (A), and then click the **Import**
+   icon, a down arrow above the list of modes (B).
+
+    ![Settings, Modes, Import](../assets/screens/dobs/v5-5-1-modes-import.png){ .screenshot }
+
+2. In **Import Mode**, open **Target Scope** and select **Global (All
+   Workspaces)** (A). Click **Import** (B).
+
+    ![Global scope, Import](../assets/screens/dobs/v5-5-1b-import-scope.png){ .screenshot }
+
+3. In the file dialog, open the folder `.bob` inside the extracted
+   repository, select `custom_modes.yaml` (A), and click **Open** (B).
+
+    ![Select custom_modes.yaml](../assets/screens/dobs/v5-5-2-select-yaml.png){ .screenshot }
+
+**Check your progress:** the list of modes contains **Summit on-call
+engineer** with the scope **Global**. A second entry with the scope
+**Workspace** can also appear, because Bob reads the mode from the folder
+too; either one works.
+
+![The imported mode](../assets/screens/dobs/v5-5-3-imported.png){ .screenshot }
+
+### 5.6 Hand the incident to the agent
 
 1. In the Bob panel, click the mode selector at the bottom of the task box
-   (it reads **Agent**) and select **Summit on-call engineer**. The mode
-   comes from the repository's `.bob` folder.
+   (it reads **Agent**) and select **Summit on-call engineer**, the mode that
+   you imported.
 
     ![Select the Summit on-call engineer mode](../assets/screens/dobs/bob-5-5-mode-picker.png){ .screenshot }
 
@@ -855,7 +945,7 @@ about 1,200 settlements from 13 pages, and closes with a four-line incident
 summary. In Airflow, the latest run of **marketplace_settlements_daily** is
 green and its log contains `loaded ... settlements for ... from 13 page(s)`.
 
-### 5.6 Review the outcome
+### 5.7 Review the outcome
 
 1. In the watsonx tab, in Data Observability, click **Triggered alerts** and
    open **Lab marketplace settlements incomplete**. The alert is still open:
