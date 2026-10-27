@@ -818,6 +818,11 @@ the list.
 
     ![The first command awaiting approval](../assets/screens/dobs/bob-5-5-first-approval.png){ .screenshot }
 
+    Bob sometimes asks its question in the chat instead of showing
+    buttons, for example whether you approve the diff and which name to
+    use for `deployed_by`. Answer in the task box, for example
+    `Approved. Use deployed_by = student1.`, and press ++enter++.
+
     In order, the agent:
 
     - reads the alert through the MCP server and reports the trigger value:
