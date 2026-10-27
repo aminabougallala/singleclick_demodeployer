@@ -746,59 +746,79 @@ panel.
 The data team keeps the pipeline in a git repository. You open the team's
 copy in Bob; the repository also carries the team's Bob configuration.
 
-1. In Bob, open the command palette with ++ctrl+shift+p++, type `Git: Clone`
-   and press ++enter++. Paste the repository URL and press ++enter++:
+1. On Bob's **Welcome** page, under **Start**, click **Clone Git
+   Repository...**. Paste the repository URL and press ++enter++:
 
     ```
     https://github.com/aminabougallala/summit-marketplace-pipeline
     ```
 
     Choose a folder for the clone, for example `Documents`, and click
-    **Open** when Bob offers to open the cloned repository.
+    **Open** when Bob offers to open the cloned repository. If Bob asks
+    whether you trust the authors of the folder, click **Yes, I trust the
+    authors**.
 
     If Bob reports that git is not installed, open
     <https://github.com/aminabougallala/summit-marketplace-pipeline> in the
     browser instead, click **Code** → **Download ZIP**, extract the ZIP, and
     open the extracted folder in Bob with **File** → **Open Folder**. The
-    on-call mode offers to install git for you in the next section.
+    on-call mode offers to install git for you in section 5.5.
 
-2. In the Explorer, confirm that the folder contains `dags/`, `docs/` and
-   `.bob/`.
+2. In the Explorer, confirm that the folder contains `.bob`, `dags`, `docs`
+   and `README.md`.
 
-**Check your progress:** the file `dags/marketplace_settlements_daily.py` is
-in the Explorer, and the mode selector at the bottom of the chat panel
-offers **Summit on-call engineer**.
+    ![The repository open in Bob](../assets/screens/dobs/bob-5-3-repo-open.png){ .screenshot }
+
+**Check your progress:** the Explorer lists `dags/marketplace_settlements_daily.py`,
+and the Bob panel on the right shows **Hi, I'm Bob** with an empty task box.
 
 ### 5.4 Connect Bob to Data Observability
 
-1. In Bob, open **Settings** → **MCP Servers** → **Edit Project MCP**. The
-   file `.bob/mcp.json` opens. It declares the server
-   **ibm-agentic-data-integration**.
+1. In the Explorer, expand `.bob` and open `mcp.json`. It declares the MCP
+   server **ibm-agentic-data-integration**.
 
 2. Replace `PASTE_LAB_API_KEY` with the API key from your instructor, so
-   that the line reads `"Authorization": "ApiKey <the key>"`. Save the file.
+   that the line reads `"Authorization": "ApiKey <the key>"`. Save the file
+   with ++ctrl+s++.
 
-3. In the MCP Servers list, confirm that **ibm-agentic-data-integration**
-   shows a green status and its tools.
+3. In the Bob panel, click the **Settings** (gear) icon at the top, and
+   then click **MCP** in the list on the left. The server
+   **ibm-agentic-data-integration** with the scope **Workspace** shows the
+   status **Connected**.
 
-**Check your progress:** the server is connected. If it shows an error,
+    ![The MCP server is connected](../assets/screens/dobs/bob-5-4-mcp-connected.png){ .screenshot }
+
+**Check your progress:** the status is **Connected**. If it shows an error,
 check that the key is pasted without spaces and that the word `ApiKey` and
-one space precede it.
+one space precede it, save the file again, and click the refresh icon above
+the list.
 
 ### 5.5 Hand the incident to the agent
 
-1. In the chat panel, open the mode selector at the bottom and select
-   **Summit on-call engineer**.
+1. In the Bob panel, click the mode selector at the bottom of the task box
+   (it reads **Agent**) and select **Summit on-call engineer**. The mode
+   comes from the repository's `.bob` folder.
 
-2. Paste the following prompt and press ++enter++:
+    ![Select the Summit on-call engineer mode](../assets/screens/dobs/bob-5-5-mode-picker.png){ .screenshot }
+
+2. Paste the following prompt into the task box and press ++enter++:
 
     ```
     An alert fired on marketplace_settlements_daily. Handle the incident: read the alert, find the cause, propose the fix for my review, deploy it and verify the re-run.
     ```
 
-3. Follow the agent. It first checks its connection and whether git is
-   installed, and offers to install git if it is missing. Approve the
-   commands and file changes that it proposes. In order, the agent:
+    ![The prompt](../assets/screens/dobs/bob-5-5-prompt.png){ .screenshot }
+
+3. Follow the agent. It first checks its connection to Data Observability
+   and whether git is installed, and offers to install git if it is
+   missing. Each command that it wants to run appears under **Tools
+   awaiting approval**: read it and click **Approve once** (or tick **I
+   understand the risk** and click **Approve** when Bob shows a security
+   warning for a command that disables certificate checks).
+
+    ![The first command awaiting approval](../assets/screens/dobs/bob-5-5-first-approval.png){ .screenshot }
+
+    In order, the agent:
 
     - reads the alert through the MCP server and reports the trigger value:
       100 rows loaded, 90% below the baseline;
@@ -807,16 +827,25 @@ one space precede it.
       run's log on Airflow, and states the cause: TrailMart now pages with a
       cursor, and the loader stops after the first page because
       `total_pages` is no longer returned;
-    - proposes the change to `fetch_settlements`, follows the cursor to the
-      last page and fails the run when fewer rows arrive than TrailMart
-      reports. Review the diff and approve it;
+    - proposes the change to `fetch_settlements`: follow the cursor to the
+      last page, and fail the run when fewer rows arrive than TrailMart
+      reports. Review the diff and click **Approved: apply the diff and
+      commit**;
+
+    ![Review the diff](../assets/screens/dobs/bob-5-5-diff-review.png){ .screenshot }
+
     - commits the change on the branch `fix/trailmart-cursor-paging`. The
       repository is read-only for the lab, so the commit stays on your
       workstation; in your own team, the next step is a pull request;
-    - deploys the change with the team's release procedure: it triggers the
-      pipeline through Airflow's API with the paging strategy that matches
-      the fix;
+    - asks to deploy the change with the team's release procedure: it
+      triggers the pipeline through Airflow's API with the paging strategy
+      that matches the fix. Click **Approved**;
+
+    ![Approve the deployment](../assets/screens/dobs/bob-5-5-deploy-approval.png){ .screenshot }
+
     - polls the run, reads its log and reports the result.
+
+    ![The agent's summary](../assets/screens/dobs/bob-5-5-summary.png){ .screenshot }
 
 **Check your progress:** the agent reports a successful run that loaded
 about 1,200 settlements from 13 pages, and closes with a four-line incident
