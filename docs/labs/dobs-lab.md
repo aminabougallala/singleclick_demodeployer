@@ -26,8 +26,7 @@ It raises an alert when a job fails or when one of its metrics leaves the
 expected range, sends that alert to the tools the team already uses, and uses
 AI to find the cause of a failure.
 
-This lab takes you through three stages, each one building on the previous
-one:
+This lab has three parts, each one building on the previous one:
 
 1. **Monitoring** (a streaming ingestion feed). You define a metric alert and
    send it to your team's on-call channel. The alert catches a problem that a
@@ -189,7 +188,7 @@ the status **Running**: it reads every record, sends each one to error
 handling, and writes nothing to its target. A monitoring tool that watches
 only the job status reports that the job is healthy.
 
-In this stage, you watch a **metric** of the job instead of its status. The
+In this part, you watch a **metric** of the job instead of its status. The
 metric counts the records that the job rejects, and an alert on it detects
 the problem within minutes.
 
@@ -442,8 +441,8 @@ within minutes and repairs the feed before the first report is produced.
 
 ## 4 Automated root cause analysis (batch job)
 
-In the first stage, you found the cause of the problem yourself by reading
-the error log. In this stage, a batch job fails, and you let AI do that work.
+In the first part, you found the cause of the problem yourself by reading
+the error log. In this part, a batch job fails, and you let AI do that work.
 
 !!! info "AI issue detection"
     For batch jobs, Data Observability analyzes every failed run with AI. It
@@ -458,7 +457,7 @@ job **Supplier spend - nightly** reads the previous night's invoices from the
 PostgreSQL table `dobs_lab.supplier_invoices`, totals the amount per supplier
 and category in the **Spend_KPIs** stage, and writes the result to
 `dobs_lab.supplier_spend_summary`, the table behind the summary. Last night,
-the invoicing team renamed a column in the invoices table. In this stage, you
+the invoicing team renamed a column in the invoices table. In this part, you
 define an alert on the status of the job, run the job, and use AI issue
 detection to identify the cause of the failure.
 
@@ -517,33 +516,43 @@ greater than 0%, because one of your batch jobs is observed.
 You run the nightly job yourself, as a data engineer does after a change,
 instead of waiting for tonight's schedule.
 
-1. Click the **☰** menu, click **Projects**, and then click **All
-   projects**. Click your project.
+1. Click the **☰** menu (A), click **Projects** (B), and then click **All
+   projects** (C).
 
-2. Click the **Assets** tab. Under **Asset types**, click **Flows**, and then
-   click **Supplier spend - nightly**. The flow opens on the canvas. It has
-   three stages: the **Supplier_invoices** source, the **Spend_KPIs**
-   aggregation and the **Supplier_spend_table** target.
+    ![All projects](../assets/screens/dobs/v4-3-2a-menu-projects.png){ .screenshot }
 
-    ![Open the flow](../assets/screens/dobs/v4-4-2b-open-flow.png){ .screenshot }
+2. Click your project.
 
-3. In the toolbar, click **Run**. The flow is already compiled, so the run
+    ![Open your project](../assets/screens/dobs/d-3-2b-open-project.png){ .screenshot }
+
+3. Click the **Assets** tab (A). Under **Asset types**, click **Flows** (B),
+   and then click **Supplier spend - nightly** (C).
+
+    ![Open the nightly flow](../assets/screens/dobs/v5-4-2a-open-flow-list.png){ .screenshot }
+
+4. The flow opens on the canvas. It has three stages: the
+   **Supplier_invoices** source, the **Spend_KPIs** aggregation and the
+   **Supplier_spend_table** target.
+
+    ![The flow on the canvas](../assets/screens/dobs/v4-4-2b-open-flow.png){ .screenshot }
+
+5. In the toolbar, click **Run**. The flow is already compiled, so the run
    starts immediately.
 
     ![Run](../assets/screens/dobs/d-3-2e-run.png){ .screenshot }
 
-4. After about 30 seconds, a red banner shows **Run failed**. Click **View
+6. After about 30 seconds, a red banner shows **Run failed**. Click **View
    log**.
 
     ![Run failed](../assets/screens/dobs/d-3-2f-run-failed.png){ .screenshot }
 
-5. Scroll through the log. It contains hundreds of lines of engine output:
+7. Scroll through the log. It contains hundreds of lines of engine output:
    environment settings, startup messages and errors from several stages.
    Nothing near the top of the log names the cause of the failure.
 
     ![The raw run log](../assets/screens/dobs/d-3-2g0-raw-log.png){ .screenshot }
 
-6. In the **Find** box of the log, type `does not exist` (A) and press
+8. In the **Find** box of the log, type `does not exist` (A) and press
    **Enter**. The error *column "amount" does not exist* appears at the far
    right of a long line, inside the SQL statement of a connector. It is one
    of 11 errors in this log.
@@ -604,28 +613,32 @@ is correct: the invoicing team renamed **amount** to **amount_usd**.
 
 ### 4.5 Fix the job
 
-1. Switch to the tab with the **Supplier spend - nightly** flow, and
-   double-click the **Supplier_invoices** stage.
+1. In the troubleshooting panel, under **Analyzing issue**, click **Go to
+   flow**. The **Supplier spend - nightly** flow opens on its canvas.
+
+    ![Go to flow](../assets/screens/dobs/v5-4-5a-go-to-flow.png){ .screenshot }
+
+2. Double-click the **Supplier_invoices** stage.
 
     ![Open the source stage](../assets/screens/dobs/3-5b-double-click-source.png){ .screenshot }
 
-2. Scroll to the **SQL** section. Find the **Select statement** field (A),
+3. Scroll to the **SQL** section. Find the **Select statement** field (A),
    and click the **Maximize** icon in its upper-right corner (B). The
    statement opens in the **Expression builder**.
 
     ![Open the SQL editor](../assets/screens/dobs/v4-4-5b-sql-editor-icon.png){ .screenshot }
 
-3. In the editor, the statement contains `sum(amount)` (A). Change it to
+4. In the editor, the statement contains `sum(amount)` (A). Change it to
    `sum(amount_usd)`, and then click **Apply and return** (B).
 
     ![The SQL statement in the Expression builder](../assets/screens/dobs/v4-4-5c-sql-fixed.png){ .screenshot }
 
-4. Click **Save** at the bottom of the stage panel, and then click the
+5. Click **Save** at the bottom of the stage panel, and then click the
    **Compile** icon in the toolbar.
 
     ![Compile](../assets/screens/dobs/3-5e-compile.png){ .screenshot }
 
-5. When the banner shows **Compile successful**, click **Run flow**.
+6. When the banner shows **Compile successful**, click **Run flow**.
 
     ![Run flow](../assets/screens/dobs/3-5f-run-flow.png){ .screenshot }
 
@@ -649,11 +662,11 @@ alerts** on the dashboard returns to 0.
 
 ## 5 End-to-end automated remediation (orchestration with Apache Airflow)
 
-In the first two stages, a person repaired the pipeline: you edited the feed,
-and you corrected the SQL statement. In this stage, an AI agent does the
+In the first two parts, a person repaired the pipeline: you edited the feed,
+and you corrected the SQL statement. In this part, an AI agent does the
 repair, from the alert to the deployed fix, and you review its work.
 
-This stage also takes observability beyond the platform. Not every pipeline
+This part also takes observability beyond the platform. Not every pipeline
 runs on watsonx.data integration. The Summit Outfitters data team runs
 **marketplace_settlements_daily** in its own Apache Airflow environment, on a
 server outside the platform. The pipeline reports each run to Data
@@ -667,7 +680,7 @@ revenue report. On a normal night, it loads about 1,200 settlements. Last
 night, TrailMart changed how its API pages through results. The pipeline
 still reads the first page, finds no sign of a second page, and finishes
 successfully. A run that loads 100 settlements instead of 1,200 is green in
-Airflow. In this stage, you detect the problem with a metric alert that
+Airflow. In this part, you detect the problem with a metric alert that
 compares each run with a baseline, and an AI agent identifies the cause and
 repairs the pipeline.
 
@@ -834,7 +847,7 @@ are now observed.
 ## 6 Summary
 
 In this lab, you observed three different pipelines from one place, detected
-three different problems, and resolved each one. Each stage added a level of
+three different problems, and resolved each one. Each part added a level of
 automation to the previous one.
 
 **Monitoring.** Two of the three problems produced no failure. The ingestion
