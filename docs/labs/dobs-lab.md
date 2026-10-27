@@ -686,8 +686,8 @@ Airflow.
     and the shared watsonx project of the lab, not on your own environment.
     The alert **Lab marketplace settlements incomplete** is already defined
     there: it compares `rows_loaded` of each run with a baseline of 1,000
-    settlements and triggers when a run deviates by more than 40%. The
-    instructor gives you the API key that connects IBM Bob to that project.
+    settlements and triggers when a run deviates by more than 40%. IBM
+    Bob connects to that project with the lab API key in section 5.4.
 
 !!! info "How the agent sees what you see"
     Data Observability publishes its alerts, job runs and metrics through an
@@ -777,9 +777,13 @@ and the Bob panel on the right shows **Hi, I'm Bob** with an empty task box.
 1. In the Explorer, expand `.bob` and open `mcp.json`. It declares the MCP
    server **ibm-agentic-data-integration**.
 
-2. Replace `PASTE_LAB_API_KEY` with the API key from your instructor, so
-   that the line reads `"Authorization": "ApiKey <the key>"`. Save the file
-   with ++ctrl+s++.
+2. Replace `PASTE_LAB_API_KEY` with the lab API key below, so that the line
+   reads `"Authorization": "ApiKey 8z5NSbE6McSHUQCHtjojBLzMoQ2ZjX0exBJgNh4lfOwI"`.
+   Save the file with ++ctrl+s++.
+
+    ```
+    8z5NSbE6McSHUQCHtjojBLzMoQ2ZjX0exBJgNh4lfOwI
+    ```
 
 3. In the Bob panel, click the **Settings** (gear) icon at the top, and
    then click **MCP** in the list on the left. The server
