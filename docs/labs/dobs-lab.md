@@ -730,14 +730,13 @@ the alert on this run, because it loaded 100 settlements instead of about
 
 ### 5.2 Open IBM Bob
 
-IBM Bob is installed on the Windows workstation of your environment.
+IBM Bob is installed on the Windows workstation at your seat.
 
-1. On your TechZone reservation page, open the Windows workstation
-   (the **Management Console** link). Sign in with the Windows credentials
-   on the same page.
+1. On the Windows desktop, open **IBM Bob** from the Start menu.
 
-2. On the Windows desktop, open **IBM Bob**. Sign in with your IBMid when
-   Bob asks for it.
+2. Sign in with your IBMid when Bob asks for it. If you do not have an
+   IBMid, create one at <https://myibm.ibm.com> with any e-mail address;
+   it takes about two minutes.
 
 **Check your progress:** IBM Bob opens with its welcome page and the chat
 panel.
