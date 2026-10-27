@@ -42,6 +42,17 @@ outside it, such as Apache Airflow pipelines.
 
 ### 1.1 Use case overview
 
+Watch this video to see agentic data observability in action before you
+start: an alert reaches the team, AI issue detection finds the cause, and
+the fix is deployed.
+
+<video controls preload="metadata" class="screenshot" style="width:100%;max-width:1000px"
+  poster="../../assets/video/agentic-data-observability-demo-poster.jpg">
+  <source src="../../assets/video/agentic-data-observability-demo.mp4" type="video/mp4">
+  Your browser does not play embedded video.
+  <a href="../../assets/video/agentic-data-observability-demo.mp4">Download the video</a>.
+</video>
+
 **Summit Outfitters** is an online retailer of outdoor equipment. In this lab,
 you are the Summit data engineer. You own three pipelines, and each one
 breaks during the lab:
