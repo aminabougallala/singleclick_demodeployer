@@ -17,12 +17,10 @@
 
 **Process e-commerce data where it resides, and turn the results into business decisions.**
 
-| | |
-|---|---|
-| **Environment** | a watsonx.data integration environment (v3.7 or later) from TechZone |
-| **Products** | watsonx.data integration: DataStage remote engine and watsonx.data integration for Apache Flink; Confluent Platform |
-| **What you provide** | nothing; the lab configures all required resources |
-| **Time** | approximately 90 minutes |
+**Duration:** about 90 minutes
+
+**Products:** watsonx.data integration (remote batch engine, streaming engine
+built on Apache Flink), Apache Kafka
 
 ## 1 Introduction
 
@@ -58,10 +56,10 @@ from the engine.
 > to your data. The control plane never connects into your network.
 
 Each business question also requires an appropriate runtime. This lab uses two
-runtimes. The **DataStage remote engine** is designed for batch processing:
+runtimes. The **remote batch engine** is designed for batch processing:
 joins, lookups and calculations over large volumes of historical data. You use
 it to determine *"which marketing campaigns pay for themselves?"* across 90
-days of orders. **watsonx.data integration for Apache Flink** is designed for
+days of orders. The **streaming engine**, built on Apache Flink, is designed for
 streaming: it processes live events individually as they arrive. You use it to
 determine *"which shopping carts are worth winning back?"* while the shopper is
 still on the site.
@@ -77,8 +75,8 @@ engineer at Summit Outfitters, you receive two requests this quarter:
    as it happens, and only chase the ones worth winning back?"*
 
 The answer to the first question supports the second. Your batch flow on the
-DataStage engine assigns each campaign a **verdict**: scale, hold or cut. Your
-streaming flow on watsonx.data integration for Apache Flink then attaches that
+batch engine assigns each campaign a **verdict**: scale, hold or cut. Your
+streaming flow on the streaming engine then attaches that
 verdict to every live shopping cart.
 
 ### 1.2 Where Summit's data lives
@@ -94,7 +92,7 @@ appears on the canvas is shown in **bold**:
 - **Daily_orders**: 90 days of orders, from the PostgreSQL table
   `shop.orders_history` (the Summit order system).
 - **Ad_spend_export**: daily advertising spend, from the file `ad_spend.csv` on
-  the local disk of the DataStage engine (the exports from the advertising
+  the local disk of the batch engine (the exports from the advertising
   platforms).
 - **campaigns_1**: the campaign catalogue, from the MySQL table `campaigns`
   (the marketing team's database). You add this source during the lab.
@@ -114,91 +112,40 @@ result for each campaign every 5 minutes to the Kafka topic
 
 ## 2 Getting started
 
-In the screenshots, a red box and arrow indicate where to click. When a screen
-contains several actions, the letters **A**, **B**, **C** indicate the order.
+!!! note "Before you start"
+    **Keep every browser tab open.** The lab opens several tabs, and later
+    steps return to tabs that you opened earlier. Do not close a tab unless a
+    step tells you to.
 
-!!! warning "Keep the Demo Builder tab open for the whole lab"
-    You return to the Demo Builder several times: to set up the lab, to
-    open your project, and to view the results at the end. Keep the Demo
-    Builder browser tab open, and open all other pages in new tabs.
+    **Opening links.** To open a link from this guide, right-click it,
+    select **Copy link address**, and paste it into a new tab of the browser
+    on your main screen.
+
+    **How to read the screenshots.** A red box or a red arrow marks the
+    element to click. When one screen needs several actions, the letters
+    **A**, **B** and **C** give their order. Names and numbers in the
+    screenshots, such as the account name or a job ID, differ from yours.
 
 --8<-- "labs/_signin.md"
 
-### 2.2 Open your environment
+### 2.2 Open your project
 
-1. Open the **Demo Builder** link from your TechZone reservation.
+Your environment is prepared before the session: the lab data, the simulated
+website traffic and four flows are already in your project.
 
-    ![The Demo Builder start page](../assets/screens/lab/2-1a-start.png){ .screenshot }
+1. Click the **☰** menu in the upper-left corner, click **Projects**, and then
+   click **All projects**.
 
-2. Click **Environment**.
-
-    ![The Environment card](../assets/screens/lab/2-1b0-environment-card.png){ .screenshot }
-
-3. Each service displays a status indicator; green indicates that the service
-   is ready. Wait until the count at the top shows that all services are ready,
-   for example **18 of 18 ready**.
-
-    ![Your environment](../assets/screens/lab/2-1b-environment.png){ .screenshot }
-
-4. Scroll down to **Data and engines**. Under **Engines**, locate the
-   **DataStage engine** (A) and the **Apache Flink engine** (B), which is the
-   engine of watsonx.data integration for Apache Flink. Both engines run on the
-   server of your environment, next to your data.
-
-    ![The two engines this lab uses](../assets/screens/lab/2-1c-engines.png){ .screenshot }
-
-### 2.3 Set up the lab
-
-1. Scroll to the top of the page and click **Back to start**.
-
-    ![Back to start](../assets/screens/lab/2-2a-back.png){ .screenshot }
-
-2. Click **Journeys**.
-
-    ![The Journeys card](../assets/screens/lab/2-2b-journeys-card.png){ .screenshot }
-
-3. Click **Lab: Remote engines, batch and streaming**.
-
-    ![The lab journey](../assets/screens/lab/2-2c-lab-tile.png){ .screenshot }
-
-4. Click **Deploy**.
-
-    ![Deploy the lab](../assets/screens/lab/2-2d-deploy.png){ .screenshot }
-
-5. Wait up to five minutes while the lab loads the sample data, starts the
-   simulated website traffic and adds four flows to your project. The panel
-   displays each step as it runs.
-
-    ![The lab deploying](../assets/screens/lab/2-2e-deploying.png){ .screenshot }
-
-**Check your progress:** the panel displays **Completed**.
-
-### 2.4 Open your project
-
-1. Under **Shortcuts**, click **Open watsonx.data integration**. The service
-   opens in a new tab, in the watsonx session from section 2.1.
-
-    ![Open watsonx.data integration](../assets/screens/lab/2-2f-completed.png){ .screenshot }
-
-2. In the top bar, verify that the selected account is your TechZone account,
-   whose name starts with `itz-saas-` (A), and that the region is **Toronto**
-   (B). If a different region is selected, click the region and select
-   **Toronto** first: your account is not listed in other regions. If a
-   different account is selected, click the account name and select your
-   `itz-saas-` account.
-
-    ![Account and region](../assets/screens/lab/2-3a-account-region.png){ .screenshot }
-
-3. In the list of projects, click your project. The project name starts with
+2. In the list of projects, click your project. Its name starts with
    `wxdi-auto-demo-`.
 
     ![Open your project](../assets/screens/lab/2-3b-open-project.png){ .screenshot }
 
-4. Click the **Assets** tab.
+3. Click the **Assets** tab.
 
     ![The Assets tab](../assets/screens/lab/2-3c-assets-tab.png){ .screenshot }
 
-5. Under **Asset types**, click **Flows**.
+4. Under **Asset types**, click **Flows**.
 
     ![The Flows asset type](../assets/screens/lab/2-3d-flows-filter.png){ .screenshot }
 
@@ -206,10 +153,10 @@ contains several actions, the letters **A**, **B**, **C** indicate the order.
 
 ![The four lab flows](../assets/screens/lab/2-3e-four-flows.png){ .screenshot }
 
-- **Marketing Performance - DRAFT** is the starting point for section 3
-  (DataStage).
-- **Storefront Live - DRAFT** is the starting point for section 4
-  (watsonx.data integration for Apache Flink).
+- **Marketing Performance - DRAFT** is the starting point for part 3, the
+  batch flow.
+- **Storefront Live - DRAFT** is the starting point for part 4, the streaming
+  flow.
 - The two **COMPLETED** flows are the finished versions. Open them at any time
   to compare them with your work.
 
@@ -220,7 +167,7 @@ contains several actions, the letters **A**, **B**, **C** indicate the order.
 > prepared to run on an engine. Each execution of a job produces a **run**,
 > which has its own log and metrics.
 
-### 2.5 Create a task credential
+### 2.3 Create a task credential
 
 Jobs run under your own identity through a **task credential**. You create a
 task credential once per account.
@@ -257,7 +204,7 @@ task credential once per account.
 
 The marketing team invests in five channels and needs to know where to
 allocate the next dollar. In this section, you build a batch flow on the
-DataStage remote engine that answers this question. The flow combines three
+remote batch engine that answers this question. The flow combines three
 sources in three formats.
 
 **Current task:** the batch portion of the lab. You start from a flow that
@@ -327,7 +274,7 @@ run the flow.
 9. Click **Compile** in the toolbar.
 
     > **Explainer - Compile and run**
-    > **Compile** converts your design into the program that the DataStage
+    > **Compile** converts your design into the program that the batch
     > engine runs. **Run flow** then creates a job and submits it to the engine.
     > Both operations take place on your remote engine, not in IBM Cloud. The
     > engine retrieves the work and processes it next to your data.
@@ -443,7 +390,7 @@ owner, in its own MySQL database. In this section, you add those details with a
 ![The Lookup done](../assets/screens/lab/3-2n-lookup-done.png){ .screenshot }
 
 > **Explainer - Three sources, three formats, one engine**
-> The flow now reads from PostgreSQL, MySQL and a CSV file. The DataStage engine
+> The flow now reads from PostgreSQL, MySQL and a CSV file. The batch engine
 > connects to each source locally through the connections in your project. The
 > flow does not specify *where* it runs. The same flow can run on an engine in
 > another cloud, next to the data in that cloud.
@@ -627,11 +574,11 @@ and receives the verdict **hold**.
 The email campaigns and brand search return several times their cost. Display
 prospecting returns approximately 50 cents for every $1 spent, so its verdict
 is *cut*. This result is the recommendation for the marketing team. In
-section 4, you apply it to live data.
+part 4, you apply it to live data.
 
 ### 3.6 Monitor your remote engine
 
-Your jobs ran on the DataStage engine in your environment, not in IBM Cloud. In
+Your jobs ran on the batch engine in your environment, not in IBM Cloud. In
 this section, you monitor the engine from the project while it processes a
 job. You use two browser tabs side by side: one for the flow and one for the
 engine.
@@ -711,27 +658,27 @@ the control plane, shows how the job reached the engine.
 
 Most shoppers who add an item to their cart leave without completing a
 purchase. Some of these abandoned carts justify a reminder or an offer, and
-others do not. The scorecard that you built in section 3 identifies which
+others do not. The scorecard that you built in part 3 identifies which
 carts to pursue. A cart from a **scale** campaign is worth pursuing, and a cart
 from a **cut** campaign is not.
 
-In this section, you run a streaming flow on watsonx.data integration for
+In this part, you run a streaming flow on the streaming engine, built on
 Apache Flink. The flow monitors website activity in real time and applies your
 batch scorecard to every cart.
 
 The following diagram shows how a streaming flow runs. You design the flow on
-the canvas (01). The engine of watsonx.data integration for Apache Flink
-translates the flow into an Apache Flink job (02). Confluent Platform for
-Apache Flink runs the job and reports its status and metrics to the control
+the canvas (01). The streaming engine
+translates the flow into an Apache Flink job (02). The Flink platform in your
+environment runs the job and reports its status and metrics to the control
 plane (03).
 
 ![From canvas design to a Flink job run by Confluent](../assets/screens/lab/4-0a-flink-design-to-run.png){ .screenshot }
 
-*You design the flow, the engine translates it into a Flink job, and Confluent Platform runs the job.*
+*You design the flow, the engine translates it into a Flink job, and the Flink platform in your environment runs the job.*
 
 **Current task:** the streaming portion of the lab. The starting flow already
 joins carts to orders. You add the totals per campaign and the verdict from
-section 3.
+part 3.
 
 > **Explainer - Kafka topics and events**
 > The website sends every click and every order to **Kafka** as an **event**:
@@ -763,8 +710,8 @@ section 3.
 > regular intervals; each save is a **checkpoint**. If the job stops, it
 > resumes from the last checkpoint.
 
-> **Explainer - watsonx.data integration for Apache Flink**
-> watsonx.data integration for Apache Flink runs streaming flows as Apache
+> **Explainer - The streaming engine**
+> The streaming engine runs streaming flows as Apache
 > Flink jobs on a Flink cluster in your own environment, next to Kafka. You
 > design the flow on the same type of canvas as other flows in your project.
 > Flink handles windows, joins between two live streams, and late or
@@ -848,11 +795,13 @@ and the joined results emitted (B).
 
 The Flink console confirms that your flow runs in your environment, next to
 Kafka. Each job runs on its own dedicated Flink cluster. You open the cluster
-from Confluent Control Center, the web console of Confluent Platform. Leave
+from Control Center, the web console of the Kafka and Flink platform. Leave
 the flow running.
 
-1. Switch to the Demo Builder browser tab. On the **Environment** page, click
-   the **Confluent Platform** tile.
+1. Copy the **Demo Builder** link from your TechZone reservation page and
+   paste it into a new tab. Click **Environment**, and then click the
+   **Confluent Platform** tile. This is the only step of the lab that uses
+   the Demo Builder: it shows the address of your environment's consoles.
 
     ![The Confluent Platform tile](../assets/screens/lab/4-1g-cp-tile.png){ .screenshot }
 
@@ -894,7 +843,7 @@ the flow running.
     ![Your job on Flink](../assets/screens/lab/4-1n-flink-job.png){ .screenshot }
 
     > **Explainer - One flow, one Flink job**
-    > When you click **Run**, watsonx.data integration for Apache Flink converts
+    > When you click **Run**, the streaming engine converts
     > your flow into a Flink job and starts a dedicated Flink cluster for it,
     > next to Kafka. Each box in the graph is an **operator** that is generated
     > from your stages. When you stop the flow, the cluster is removed.
@@ -993,8 +942,8 @@ records by campaign and totals them in 5-minute tumbling windows.
 The totals per campaign show the e-commerce team how much revenue remains
 in abandoned carts. They do not indicate whether to pursue it. A cart from
 a campaign that loses money does not justify a discount code. A cart from a
-campaign that returns $10 for every $1 does. Your DataStage flow calculated
-this assessment in section 3. In this section, you connect the batch and
+campaign that returns $10 for every $1 does. Your batch flow calculated
+this assessment in part 3. In this part, you connect the batch and
 streaming portions of the lab by adding the verdict to every live result.
 
 > **Explainer - Batch results in a live stream**
@@ -1122,8 +1071,8 @@ The following two records are from an actual run:
  "campaign_name": "Display prospecting", "roas": 0.54, "verdict": "cut"}
 ```
 
-The **roas** and **verdict** values are the values that your DataStage flow
-calculated in section 3. The batch result is now attached to every live
+The **roas** and **verdict** values are the values that your batch flow
+calculated in part 3. The batch result is now attached to every live
 record. In this 5-minute window, brand search shoppers added $6,687 to their
 carts and paid $539. More than $6,000 remains in abandoned carts from a
 campaign that returns $10 for every $1. Based on this result, the e-commerce
@@ -1148,7 +1097,7 @@ storefront, campaigns and scorecard as your lab, with simulated shoppers.
 2. Click **Marketing dashboard**. For each campaign, the dashboard displays
    the carts, cart value and converted revenue (from your Flink flow), the
    revenue remaining in abandoned carts, and the return on ad spend and verdict
-   (from your DataStage flow). The headline value is the current abandoned-cart
+   (from your batch flow). The headline value is the current abandoned-cart
    revenue from **scale** campaigns only, which is the revenue worth
    recovering.
 
@@ -1167,16 +1116,16 @@ plane on IBM Cloud, and run them on remote engines in any cloud, data center or
 private network. Data is processed where it resides, which reduces data
 transfer costs and latency.
 
-**The right runtime for every workload** – Use the DataStage parallel engine
-for joins, lookups and transformations over historical data. Use watsonx.data
-integration for Apache Flink for time windows and stream joins over live
+**The right runtime for every workload** – Use the batch engine
+for joins, lookups and transformations over historical data. Use the streaming
+engine, built on Apache Flink, for time windows and stream joins over live
 events. Both runtimes share the same project and the same canvas.
 
 **Any source, any format** – Read from PostgreSQL, MySQL, CSV files on the
 local disk of the engine and Kafka events, through the connections in your
 project.
 
-**Batch insight, real-time action** – The verdict that DataStage calculated over
+**Batch insight, real-time action** – The verdict that the batch flow calculated over
 90 days of history drives a decision on every live shopping cart.
 
 ## 6 Reference

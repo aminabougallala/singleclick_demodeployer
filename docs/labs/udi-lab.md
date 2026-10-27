@@ -21,12 +21,10 @@
 
 **In this lab, you convert scanned supplier documents into tables that you can query and passages that you can search.**
 
-| | |
-|---|---|
-| **Environment** | a watsonx.data integration environment (v3.7 or later) from TechZone |
-| **Products** | watsonx.data integration: Unstructured data curation and Unstructured Data Integration; watsonx.data (Presto, Iceberg, Milvus) |
-| **What you provide** | nothing; the lab sets up all required resources |
-| **Time** | about 45 minutes |
+**Duration:** about 45 minutes
+
+**Products:** watsonx.data integration (unstructured data curation and
+processing), watsonx.data (Presto, Iceberg, Milvus), watsonx.ai
 
 ## 1 Introduction
 
@@ -86,52 +84,45 @@ entry.
 
 ## 2 Getting started
 
-In the screenshots, a red box and arrow indicate where to click. When a screen
-contains several actions, the letters **A**, **B** and **C** indicate their
-order.
+!!! note "Before you start"
+    **Keep every browser tab open.** The lab opens several tabs, and later
+    steps return to tabs that you opened earlier. Do not close a tab unless a
+    step tells you to.
+
+    **Opening links.** To open a link from this guide, right-click it,
+    select **Copy link address**, and paste it into a new tab of the browser
+    on your main screen.
+
+    **How to read the screenshots.** A red box or a red arrow marks the
+    element to click. When one screen needs several actions, the letters
+    **A**, **B** and **C** give their order. Names and numbers in the
+    screenshots, such as the account name, differ from yours.
 
 --8<-- "labs/_signin.md"
 
-### 2.2 Set up the lab
+### 2.2 Open the lab project
 
-The lab setup stores the six documents in Cloud Object Storage and connects
-your project to them. It also creates the connections to Milvus and Presto
-that processing writes to.
+Your environment is prepared before the session. The lab has its own project,
+**LAB-1861 Unstructured Data**, which already contains a connection to the six
+documents and the connections to the shared watsonx.data where processing
+writes its tables and vectors.
 
-1. Open the **Demo Builder** link from your TechZone reservation. The Demo
-   Builder is a web page that does not require you to sign in.
+1. Click the **☰** menu in the upper-left corner, click **Projects**, and then
+   click **All projects**.
 
-2. Click the **Journeys** card.
+2. Click **LAB-1861 Unstructured Data**. Do not use the project whose name
+   starts with `wxdi-auto-demo-`: it belongs to another lab.
 
-    ![The Journeys card](../assets/screens/udi/2-1a-journeys-card.png){ .screenshot }
+3. Click the **Assets** tab.
 
-3. Click **Lab: From chaos to clarity, unstructured data**.
+4. Note the name of your TechZone account in the top bar, for example
+   `itz-saas-123`. You use it to name your work in section 3.1 and to search
+   your documents in part 6, because the watsonx.data that stores the results
+   is shared by everyone in the room.
 
-    ![The lab journey](../assets/screens/udi/2-1b-lab-tile.png){ .screenshot }
-
-4. Click **Deploy**.
-
-    ![Deploy the lab](../assets/screens/udi/2-1c-deploy.png){ .screenshot }
-
-5. Wait while the lab setup runs. It takes about one minute.
-
-    ![The lab deploying](../assets/screens/udi/2-1d-deploying.png){ .screenshot }
-
-**Check your progress:** the panel shows **Completed.** and a **Next steps**
-box.
-
-![The lab is set up](../assets/screens/udi/2-1e-completed.png){ .screenshot }
-
-### 2.3 Open your project
-
-1. Under **Shortcuts**, click **Your project**. It opens in the watsonx
-   session from section 2.1. Keep the Demo Builder tab open, because you
-   return to it in section 6.
-
-    ![Your project](../assets/screens/udi/2-2a-your-project.png){ .screenshot }
-
-**Check your progress:** your project opens on the **Assets** tab. The top
-bar shows your TechZone account and the **Toronto** region. If they differ, select the **Toronto** region first (your account is not listed in other regions), and then your `itz-saas-` account.
+**Check your progress:** the **Assets** tab of **LAB-1861 Unstructured Data**
+lists the connections **udi_lab_documents**, **udi_lab_presto** and
+**udi_lab_milvus**.
 
 ## 3 Analyze the documents
 
@@ -150,8 +141,10 @@ without you opening any file.
 
     ![Analyze and enrich unstructured data](../assets/screens/udi/3-1b-tile.png){ .screenshot }
 
-3. In the **Name** field, type `Summit supplier documents` (A). Then click
-   **Save** (B).
+3. In the **Name** field, type your account name followed by
+   `supplier documents`, for example `itz-saas-123 supplier documents` (A).
+   Then click **Save** (B). The account name at the start keeps your document
+   sets apart from everyone else's in the shared watsonx.data.
 
     ![Name the curation asset](../assets/screens/udi/3-1c-name.png){ .screenshot }
 
@@ -168,7 +161,7 @@ without you opening any file.
     credential**. Enter a name and click **Create**. Then return to the
     project and create the curation asset again.
 
-**Check your progress:** the breadcrumb ends with **Summit supplier documents**,
+**Check your progress:** the breadcrumb ends with the name of your curation asset,
 and the page shows an **Add documents** button.
 
 ### 3.2 Add the documents
@@ -327,17 +320,19 @@ for the tables.
 
     ![udi_lab_presto](../assets/screens/udi/5-1f-presto.png){ .screenshot }
 
-6. Click **idr_iceberg**, which is the Iceberg catalog in watsonx.data.
+6. Click **techxchange_udi**, the Iceberg catalog of the lab in watsonx.data.
 
-    ![The idr_iceberg catalog](../assets/screens/udi/5-1g-catalog.png){ .screenshot }
+    ![The lab catalog](../assets/screens/udi/5-1g-catalog.png){ .screenshot }
 
-7. Select the **udi_lab** schema (A), and then click **Select** (B).
+7. Select the schema named after your account, for example
+   **udi_itz_saas_123** (A), and then click **Select** (B). Select only your
+   own schema: the other schemas belong to the other students in the room.
 
-    ![The udi_lab schema](../assets/screens/udi/5-1h-schema.png){ .screenshot }
+    ![Your schema](../assets/screens/udi/5-1h-schema.png){ .screenshot }
 
 8. Verify that the vector connection shows **udi_lab_milvus** (A) and that the
-   structured output shows **udi_lab_presto idr_iceberg / udi_lab** (B). Click
-   **Save** (C).
+   structured output shows **udi_lab_presto techxchange_udi /
+   udi_<your account>** (B). Click **Save** (C).
 
     ![The processing settings](../assets/screens/udi/5-1i-config-done.png){ .screenshot }
 
@@ -392,15 +387,16 @@ created.
 Processing takes about 5 minutes. You can monitor its progress from the
 project.
 
-1. In the breadcrumb at the top of the page, click your project name. The
-   name starts with **wxdi-auto-demo-**.
+1. In the breadcrumb at the top of the page, click **LAB-1861 Unstructured
+   Data**.
 
 2. Click the **Jobs** tab.
 
     ![The Jobs tab](../assets/screens/udi/5-3a-jobs-tab.png){ .screenshot }
 
-3. Click **Processing flow 1 for Summit supplier documents**. The job name
-   ends with the date and time when you started processing.
+3. Click the job whose name starts with **Processing flow 1 for** and the name
+   of your curation asset. The job name ends with the date and time when you
+   started processing.
 
     ![The processing job](../assets/screens/udi/5-3b-job-running.png){ .screenshot }
 
@@ -444,10 +440,10 @@ about 3 to 4 minutes of run time.
 
 !!! tip "One document set has a long technical name"
     Most document sets have names such as
-    `Summit_supplier_documents___Document_set___Invoice`. The Product Return
-    Request document set can show a shortened name that contains an ID, such
-    as `Summit_supplier_document___d05147d4...`, because the full name exceeds
-    the length limit. The document set content is the same.
+    `itz_saas_123_supplier_documents___Document_set___Invoice`. The Product
+    Return Request document set can show a shortened name that contains an ID,
+    because the full name exceeds the length limit. The document set content is
+    the same.
 
 These tables give accounts payable the values that the team previously
 entered manually. The values are stored in Iceberg tables, which any engine
@@ -459,22 +455,19 @@ Tables answer questions about amounts and dates. Vectors answer questions
 about reasons and events, based on the text of the documents. In this
 section, you ask both types of question.
 
-The Demo Builder includes a **Document search** page that uses the outputs
-that you created. The page searches the vectors that your job wrote to
-Milvus. It also uses watsonx.ai to generate SQL queries over the tables that
-your job wrote to watsonx.data.
+The **Document search** page uses the outputs that you created. It searches
+the vectors that your job wrote to Milvus, and it uses watsonx.ai to write SQL
+queries over the tables that your job wrote to watsonx.data. It searches only
+the document sets and the schema of the account that you enter.
 
 ### 6.1 Open Document search
 
-1. Return to the Demo Builder tab. In the **Next steps** box of the lab, under
-   **Shortcuts**, click **Search your documents**. If you closed the Demo
-   Builder tab, open the Demo Builder link again and append `/search` to the
-   address.
+1. Copy the following link and paste it into a new tab of the browser on your
+   main screen: <https://udi-search.23ij0n2ztu5p.ca-tor.codeengine.appdomain.cloud/>
 
-    ![Search your documents](../assets/screens/udi/6-1a-search-link.png){ .screenshot }
-
-2. The **Document search** page opens. The page does not require you to sign
-   in.
+2. The **Document search** page opens. It does not require you to sign in. In
+   **Your TechZone account**, type your account name, for example
+   `itz-saas-123`.
 
     ![Document search](../assets/screens/udi/6-1b-search-page.png){ .screenshot }
 
@@ -525,7 +518,7 @@ appears below the query: **ridgeline tent co.**, **33250**, due
 
 The generated SQL can vary between runs, because a language model generates
 it. The amounts and dates do not vary, because they are the values extracted
-from the invoices in section 5.
+from the invoices in part 5.
 
 ## 7 Summary
 

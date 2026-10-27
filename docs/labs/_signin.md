@@ -44,6 +44,9 @@ need: the identifier of your environment and the user names and passwords.
 
     ![Sign in with the environment's credentials](../assets/screens/signin/signin-4-techzone-signin.png){ .screenshot }
 
+    The first time you sign in, the page **Provide your information to
+    continue** can open. Click **Continue**.
+
 **Check your progress:** the IBM watsonx home page opens. The top bar shows
 your TechZone account, whose name starts with `itz-saas-` (A), and the region
 **Toronto** (B). Keep this tab open. You use it for the rest of the lab.
