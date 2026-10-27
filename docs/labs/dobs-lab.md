@@ -807,16 +807,12 @@ the list.
     An alert fired on marketplace_settlements_daily. Handle the incident: read the alert, find the cause, propose the fix for my review, deploy it and verify the re-run.
     ```
 
-    ![The prompt](../assets/screens/dobs/bob-5-5-prompt.png){ .screenshot }
-
 3. Follow the agent. It first checks its connection to Data Observability
    and whether git is installed, and offers to install git if it is
    missing. Each command that it wants to run appears under **Tools
    awaiting approval**: read it and click **Approve once** (or tick **I
    understand the risk** and click **Approve** when Bob shows a security
    warning for a command that disables certificate checks).
-
-    ![The first command awaiting approval](../assets/screens/dobs/bob-5-5-first-approval.png){ .screenshot }
 
     Bob sometimes asks its question in the chat instead of showing
     buttons, for example whether you approve the diff and which name to
@@ -845,8 +841,6 @@ the list.
     - asks to deploy the change with the team's release procedure: it
       triggers the pipeline through Airflow's API with the paging strategy
       that matches the fix. Click **Approved**;
-
-    ![Approve the deployment](../assets/screens/dobs/bob-5-5-deploy-approval.png){ .screenshot }
 
     - polls the run, reads its log and reports the result.
 
