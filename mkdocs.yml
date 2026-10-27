@@ -1,0 +1,80 @@
+# TechXchange 2026 hands-on lab guides, built with MkDocs Material.
+# Preview: pip install -r docs-requirements.txt && mkdocs serve
+# Publish: the GitHub Actions workflow in .github/workflows/docs.yml builds
+#          the site on every push to this branch and deploys it to GitHub Pages.
+site_name: watsonx.data integration · TechXchange 2026 labs
+site_description: Hands-on lab guides for watsonx.data integration at IBM TechXchange 2026.
+site_url: https://aminabougallala.github.io/singleclick_demodeployer/
+repo_url: https://github.com/aminabougallala/singleclick_demodeployer
+repo_name: singleclick_demodeployer
+docs_dir: docs
+site_dir: site
+copyright: IBM Technology Sales · Americas
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  icon:
+    logo: material/book-open-variant
+  font:
+    text: IBM Plex Sans
+    code: IBM Plex Mono
+  features:
+    - navigation.tracking
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.tabs.link
+    - toc.follow
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+plugins:
+  - search
+  - glightbox:
+      touchNavigation: true
+      zoomable: true
+      skip_classes: [no-lightbox]
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets:
+      base_path: [docs, .]
+      check_paths: true
+
+# Snippets included by other pages, not pages themselves.
+exclude_docs: |
+  labs/_*.md
+
+nav:
+  - Labs: index.md
+  - "LAB-3079: Agentic Data Observability": labs/dobs-lab.md
+  - "LAB-1861: From Chaos to Clarity, Unstructured Data": labs/udi-lab.md
+  - "LAB-3106: Remote Engines": labs/remote-engines-lab.md

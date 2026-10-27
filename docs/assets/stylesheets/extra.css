@@ -1,0 +1,56 @@
+/* IBM blue for the header and links (Carbon blue 60 / 40 on dark). */
+:root > * {
+  --md-primary-fg-color: #0f62fe;
+  --md-primary-fg-color--light: #4589ff;
+  --md-primary-fg-color--dark: #0043ce;
+  --md-accent-fg-color: #0043ce;
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0f62fe;
+  --md-accent-fg-color: #78a9ff;
+  --md-typeset-a-color: #78a9ff;
+}
+
+/* Screenshots: a light frame so white UI does not melt into the page. */
+.md-typeset img.screenshot {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.md-typeset figure figcaption {
+  font-size: 0.75rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* The concept diagram on the Architecture page: three layers of cards. */
+.arch { margin: 1rem 0 1.5rem; }
+.arch-layer {
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 8px;
+  padding: .6rem .8rem .8rem;
+  background: var(--md-code-bg-color);
+}
+.arch-env { border-color: var(--md-primary-fg-color); box-shadow: inset 4px 0 0 var(--md-primary-fg-color); }
+.arch-title { font-weight: 700; font-size: .8rem; margin-bottom: .5rem; }
+.arch-title span { font-weight: 400; color: var(--md-default-fg-color--light); margin-left: .5rem; }
+.arch-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem; }
+.arch-card {
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 6px;
+  padding: .5rem .6rem;
+  font-size: .68rem;
+  line-height: 1.35;
+  color: var(--md-default-fg-color--light);
+  text-align: center;
+}
+.arch-card b { display: block; font-size: .74rem; color: var(--md-default-fg-color); margin-bottom: .15rem; }
+.arch-link { text-align: center; font-size: .68rem; color: var(--md-default-fg-color--light); padding: .35rem 0; letter-spacing: .02em; }
+
+/* Screenshots are 2× captures of a 1280–1440 px window; give them room.
+   The content column widens to about 1000 px and every screenshot fills it;
+   the lightbox (glightbox) opens the full-resolution image on a click. */
+.md-grid { max-width: 1600px; }
+.md-typeset figure { margin: 1em 0; }
+.md-typeset figure img.screenshot,
+.md-typeset img.screenshot { width: auto; max-width: 100%; cursor: zoom-in; }

@@ -1,0 +1,300 @@
+{
+  "document": {
+    "fields": [
+      {
+        "name": "rma_number",
+        "examples": [
+          "RMA-30117"
+        ],
+        "description": "The return merchandise authorization (RMA) number assigned to the request",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "request_date",
+        "examples": [
+          "October 6, 2026"
+        ],
+        "description": "The date the customer submitted the return or warranty request",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "customer_name",
+        "examples": [
+          "Jordan Ellis"
+        ],
+        "description": "The full name of the customer returning the product",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "order_number",
+        "examples": [
+          "SO-884213"
+        ],
+        "description": "The customer's online order number for the original purchase",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "product_name",
+        "examples": [
+          "Trailhead 2P Backpacking Tent, sage green"
+        ],
+        "description": "The name of the product being returned",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "product_sku",
+        "examples": [
+          "RT-2P-TRL"
+        ],
+        "description": "The SKU or item code of the product being returned",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "manufacturer",
+        "examples": [
+          "Ridgeline Tent Co."
+        ],
+        "description": "The brand or manufacturer of the product",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "purchase_date",
+        "examples": [
+          "September 28, 2026"
+        ],
+        "description": "The date the customer bought the product",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "purchase_price",
+        "examples": [
+          "$279.00"
+        ],
+        "description": "The price the customer paid for the product",
+        "extraction_instructions": ""
+      },
+      {
+        "name": "return_reason",
+        "examples": [
+          "Defective or broken"
+        ],
+        "description": "The reason category checked for the return",
+        "extraction_instructions": "Return the label of the checked box only."
+      },
+      {
+        "name": "problem_description",
+        "examples": [
+          "The main pole cracked at the ferrule on first setup"
+        ],
+        "description": "The customer's description of the problem with the product",
+        "extraction_instructions": "Summarize in one sentence."
+      },
+      {
+        "name": "resolution_requested",
+        "examples": [
+          "Replacement of the same item"
+        ],
+        "description": "The resolution the customer asked for, such as replacement, refund, store credit or repair",
+        "extraction_instructions": "Return the label of the checked box only."
+      },
+      {
+        "name": "warranty_claim",
+        "examples": [
+          "Yes"
+        ],
+        "description": "Whether the request is covered by the manufacturer warranty",
+        "extraction_instructions": "Answer Yes or No."
+      },
+      {
+        "name": "decision",
+        "examples": [
+          "Approved: replacement shipped October 7, 2026"
+        ],
+        "description": "The retailer's decision on the request, from the internal-use section",
+        "extraction_instructions": ""
+      }
+    ],
+    "document_type": "Product Return Request",
+    "document_description": "A product return and warranty request form that a customer of a retailer completes to send back a purchased product. It gives a return merchandise authorization (RMA) number, the customer and their order number, the product and SKU, the purchase date and price, the reason for return (defective, wrong item, damaged, no longer needed), a description of the problem, the resolution requested (replacement, refund, store credit or repair), whether it is a warranty claim, and the retailer's decision."
+  },
+  "target_tables": [
+    {
+      "name": "Product_Return_Request",
+      "columns": [
+        {
+          "name": "rma_number",
+          "type": "string",
+          "source": {
+            "field": [
+              "rma_number"
+            ]
+          },
+          "description": "The return merchandise authorization (RMA) number assigned to the request"
+        },
+        {
+          "name": "request_date",
+          "type": "date",
+          "source": {
+            "transform": {
+              "arguments": [
+                {
+                  "name": "date_str",
+                  "value": {
+                    "field": [
+                      "request_date"
+                    ]
+                  }
+                }
+              ],
+              "transform_name": "make_date_uniform"
+            }
+          },
+          "description": "The date the customer submitted the return or warranty request"
+        },
+        {
+          "name": "customer_name",
+          "type": "string",
+          "source": {
+            "field": [
+              "customer_name"
+            ]
+          },
+          "description": "The full name of the customer returning the product"
+        },
+        {
+          "name": "order_number",
+          "type": "string",
+          "source": {
+            "field": [
+              "order_number"
+            ]
+          },
+          "description": "The customer's online order number for the original purchase"
+        },
+        {
+          "name": "product_name",
+          "type": "string",
+          "source": {
+            "field": [
+              "product_name"
+            ]
+          },
+          "description": "The name of the product being returned"
+        },
+        {
+          "name": "product_sku",
+          "type": "string",
+          "source": {
+            "field": [
+              "product_sku"
+            ]
+          },
+          "description": "The SKU or item code of the product being returned"
+        },
+        {
+          "name": "manufacturer",
+          "type": "string",
+          "source": {
+            "field": [
+              "manufacturer"
+            ]
+          },
+          "description": "The brand or manufacturer of the product"
+        },
+        {
+          "name": "purchase_date",
+          "type": "date",
+          "source": {
+            "transform": {
+              "arguments": [
+                {
+                  "name": "date_str",
+                  "value": {
+                    "field": [
+                      "purchase_date"
+                    ]
+                  }
+                }
+              ],
+              "transform_name": "make_date_uniform"
+            }
+          },
+          "description": "The date the customer bought the product"
+        },
+        {
+          "name": "purchase_price",
+          "type": "decimal",
+          "source": {
+            "transform": {
+              "arguments": [
+                {
+                  "name": "amount",
+                  "value": {
+                    "field": [
+                      "purchase_price"
+                    ]
+                  }
+                }
+              ],
+              "transform_name": "currency_to_numeric"
+            }
+          },
+          "description": "The price the customer paid for the product"
+        },
+        {
+          "name": "return_reason",
+          "type": "string",
+          "source": {
+            "field": [
+              "return_reason"
+            ]
+          },
+          "description": "The reason category checked for the return"
+        },
+        {
+          "name": "problem_description",
+          "type": "string",
+          "source": {
+            "field": [
+              "problem_description"
+            ]
+          },
+          "description": "The customer's description of the problem with the product"
+        },
+        {
+          "name": "resolution_requested",
+          "type": "string",
+          "source": {
+            "field": [
+              "resolution_requested"
+            ]
+          },
+          "description": "The resolution the customer asked for, such as replacement, refund, store credit or repair"
+        },
+        {
+          "name": "warranty_claim",
+          "type": "string",
+          "source": {
+            "field": [
+              "warranty_claim"
+            ]
+          },
+          "description": "Whether the request is covered by the manufacturer warranty"
+        },
+        {
+          "name": "decision",
+          "type": "string",
+          "source": {
+            "field": [
+              "decision"
+            ]
+          },
+          "description": "The retailer's decision on the request, from the internal-use section"
+        }
+      ],
+      "metadata": {},
+      "description": "A product return and warranty request form that a customer of a retailer completes to send back a purchased product. It gives a return merchandise authorization (RMA) number, the customer and their order number, the product and SKU, the purchase date and price, the reason for return (defective, wrong item, damaged, no longer needed), a description of the problem, the resolution requested (replacement, refund, store credit or repair), whether it is a warranty claim, and the retailer's decision."
+    }
+  ],
+  "document_class_schema_version": "1.0"
+}
