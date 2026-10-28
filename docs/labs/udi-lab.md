@@ -358,12 +358,17 @@ for the tables.
 
 3. Review the **Process documents** panel. It shows the source, the enabled
    steps (**Make data ready for AI** and **Extract structured information**),
-   the two output connections and one **Document set** per class. Click
-   **Process documents**.
+   the two output connections and one **Document set** per class.
 
     ![The Process documents panel](../assets/screens/udi/5-2b-process-panel.png){ .screenshot }
 
-4. When the **Save the updated settings?** prompt appears, click **Save
+4. Scroll down to **Document sets**. If a red message **Document set storage
+   details missing** appears, click **Select connection**. If a blue message
+   **Fetch document set storage details** then appears, click **Fetch
+   connection**. The message disappears and the **Process documents** button
+   becomes available.
+5. Click **Process documents**.
+6. When the **Save the updated settings?** prompt appears, click **Save
    settings**.
 
     ![Save settings](../assets/screens/udi/5-2c-save-settings.png){ .screenshot }

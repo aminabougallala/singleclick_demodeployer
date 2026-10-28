@@ -17,7 +17,7 @@
 
 **Process e-commerce data where it resides, and turn the results into business decisions.**
 
-**Duration:** about 90 minutes
+**Duration:** about 60 minutes, plus an optional appendix
 
 **Products:** watsonx.data integration (remote batch engine, streaming engine
 built on Apache Flink), Apache Kafka
@@ -94,8 +94,8 @@ appears on the canvas is shown in **bold**:
 - **Ad_spend_export**: daily advertising spend, from the file `ad_spend.csv` on
   the local disk of the batch engine (the exports from the advertising
   platforms).
-- **campaigns_1**: the campaign catalogue, from the MySQL table `campaigns`
-  (the marketing team's database). You add this source during the lab.
+- **Campaign_catalogue**: the campaign catalogue, from the MySQL table
+  `campaigns` (the marketing team's database).
 - **Storefront clicks** and **Storefront orders**: live website events, from
   the Kafka topics `shop.clicks` and `shop.orders`.
 
@@ -153,12 +153,11 @@ website traffic and four flows are already in your project.
 
 ![The four lab flows](../assets/screens/lab/2-3e-four-flows.png){ .screenshot }
 
-- **Marketing Performance - DRAFT** is the starting point for part 3, the
-  batch flow.
-- **Storefront Live - DRAFT** is the starting point for part 4, the streaming
-  flow.
-- The two **COMPLETED** flows are the finished versions. Open them at any time
-  to compare them with your work.
+- **Marketing Performance - DRAFT** and **Storefront Live - DRAFT** are the
+  starting flows. You run them first, in parts 3 and 4.
+- **Marketing Performance - COMPLETED** and **Storefront Live - COMPLETED**
+  are the finished flows. You explore and run them next. They answer the
+  business questions.
 
 > **Explainer - Projects, flows and jobs**
 > A **project** is a shared team workspace that contains flows, connections and
@@ -203,13 +202,13 @@ task credential once per account.
 ## 3 Batch: which campaigns pay for themselves?
 
 The marketing team invests in five channels and needs to know where to
-allocate the next dollar. In this section, you build a batch flow on the
+allocate the next dollar. In this section, you run a batch flow on the
 remote batch engine that answers this question. The flow combines three
 sources in three formats.
 
-**Current task:** the batch portion of the lab. You start from a flow that
-already joins two sources. You then add the third source, the calculations and
-the database target.
+**Current task:** the batch portion of the lab. You run a starting flow that
+joins two sources. You then explore and run the finished flow, which adds the
+third source, the calculations and the database target.
 
 > **Explainer - Stages and links**
 > Each box on the canvas is a **stage**. A stage is a source that reads data, a
@@ -307,231 +306,92 @@ rows**: one row per campaign per day.
 
 ![720 rows on every link](../assets/screens/lab/3-1j-row-counts.png){ .screenshot }
 
-### 3.2 Add the campaign catalogue from MySQL
+### 3.2 Explore and run the finished flow
 
-Campaign identifiers such as `DISP-PROSPECTING` are difficult to interpret. The
-marketing team stores the campaign details, including the name, channel and
-owner, in its own MySQL database. In this section, you add those details with a
-**Lookup** stage.
+The finished flow, **Marketing Performance - COMPLETED**, contains the
+starting flow and four more stages. Together they answer the marketing
+team's question. In this section, you examine each new stage and then run
+the flow. You do not need to change anything.
 
-1. Click **Add asset to canvas +**.
+1. In the breadcrumb at the top of the page, click the name of your project.
+   Then click **Marketing Performance - COMPLETED** in the list of flows. The
+   flow opens on the canvas.
+2. Locate the four stages that the starting flow does not contain:
+   **Campaign_catalogue** (A), **Add_campaign_details** (B),
+   **Marketing_KPIs** (C) and **Campaign_performance_table** (D).
 
-    ![Add asset to canvas](../assets/screens/lab/3-2a-add-asset.png){ .screenshot }
+    ![The finished flow](../assets/screens/lab/3-2a-completed-canvas.png){ .screenshot }
 
-2. Click the **›** next to **Connection**.
+3. Double-click **Campaign_catalogue**, and then click the **Output** tab (A).
+   This stage reads the campaign catalogue from the marketing team's MySQL
+   database: the name, channel, objective and owner of each campaign (B).
+   Click **Cancel**.
 
-    ![Connection](../assets/screens/lab/3-2b-connection.png){ .screenshot }
+    ![The campaign catalogue](../assets/screens/lab/3-2b-catalogue-output.png){ .screenshot }
 
-3. Click the **›** next to **demo_conn_mysql**.
+4. Double-click **Add_campaign_details**. This **Lookup** stage adds the
+   catalogue details to each row of the join. The **Key expression** is
+   **campaign_id** (A), the column that both inputs share. **Lookup failure**
+   is set to **Continue** (B), so a day with an unknown campaign is kept
+   instead of failing the job. Click **Cancel**.
 
-    ![demo_conn_mysql](../assets/screens/lab/3-2c-mysql.png){ .screenshot }
-
-4. Click the **›** next to **demodb**.
-
-    ![demodb](../assets/screens/lab/3-2d-demodb.png){ .screenshot }
-
-5. Select **campaigns** (A). Wait until **Selected assets** shows **1 / 1** (B),
-   then click **Add** (C). A **campaigns_1** node appears on the canvas.
-
-    ![The campaigns table](../assets/screens/lab/3-2e-pick-campaigns.png){ .screenshot }
-
-6. In **Find palette nodes**, enter `Lookup` (A). Drag the **Lookup** stage
-   listed under **Processing** (B), not *Lookup file set*. Drop it on the link
-   between **Join_on_campaign_and_day** and **Daily_performance_csv** (C). A
-   **Lookup_1** node appears between the two stages.
-
-    ![Drop a Lookup on the link](../assets/screens/lab/3-2f-drop-lookup.png){ .screenshot }
-
-7. Hover over **campaigns_1** (A) and drag from its right edge to
-   **Lookup_1** (B). The new link is dashed. This dashed link is the
-   **reference** link from which the Lookup stage reads.
-
-    ![Connect the campaigns table](../assets/screens/lab/3-2g-connect-campaigns.png){ .screenshot }
+    ![The lookup on campaign_id](../assets/screens/lab/3-2c-lookup-key.png){ .screenshot }
 
     > **Explainer - Lookups**
     > A **Lookup** stage adds details to each row from a reference table. The
     > solid link carries the rows to enrich. The dashed **reference** link
     > carries the table that supplies the details. The **key** is the column
-    > that both inputs share, in this case `campaign_id`.
+    > that both inputs share.
 
-8. Double-click **Lookup_1**.
+5. Double-click **Marketing_KPIs**, and then click the **Output** tab (A).
+   Scroll down the **Output** list to the last three columns (B). This
+   **Transformer** stage calculates three metrics per campaign, per day:
+    - **roas**: return on ad spend, which is revenue divided by spend. A value
+      of 3.0 means that every $1 of advertising generated $3 of sales.
+    - **cpa_usd**: cost per acquisition, which is the advertising cost of each
+      order.
+    - **ctr_pct**: click-through rate, which is the percentage of ad
+      impressions that resulted in a click.
 
-    ![The Lookup in place](../assets/screens/lab/3-2h-lookup-connected.png){ .screenshot }
+    Click **Cancel**.
 
-9. Click the **Input** tab (A). Set **Input name** to **Link_3** (B), which is
-    the dashed campaigns link, then click **Edit** (C).
+    ![The three metrics](../assets/screens/lab/3-2d-kpis-output.png){ .screenshot }
 
-    ![The reference link](../assets/screens/lab/3-2i-reference-link.png){ .screenshot }
+6. Double-click **Campaign_performance_table**. This stage loads the results
+   into the PostgreSQL table **shop.campaign_performance**, which the
+   marketing team reads its reports from. Each run empties the table first,
+   so repeated runs do not duplicate rows. Click **Cancel**.
 
-10. Select the **Key** checkbox for **campaign_id** (A) and click **Apply and
-    return** (B).
+    ![The results table](../assets/screens/lab/3-2e-target-table.png){ .screenshot }
 
-    ![Mark the key](../assets/screens/lab/3-2j-set-key.png){ .screenshot }
+7. Click **Compile** in the toolbar.
 
-11. Click the **Stage** tab (A). Expand **Key expression** (B) and select
-    **campaign_id** (C).
+    ![Compile](../assets/screens/lab/3-1f-compile.png){ .screenshot }
 
-    ![The key expression](../assets/screens/lab/3-2k-key-expression.png){ .screenshot }
+8. Wait until the green **Compile successful** banner appears, then click
+   **Run flow** in the banner. The run takes approximately one minute.
 
-12. Expand **Lookup failure** (A) and select **Continue** (B). With this
-    setting, a day with an unknown campaign is retained instead of causing the
-    job to fail.
+**Check your progress:** the banner displays **Run successful** (A). The link
+into **Campaign_performance_table** displays **720 rows** (B), the same count
+as the join. The dashed link from the campaign catalogue displays **8 rows**.
 
-    ![Lookup failure: Continue](../assets/screens/lab/3-2l-lookup-failure.png){ .screenshot }
-
-13. Click the **Output** tab (A). Each row now includes the catalogue columns,
-    such as **campaign_name**, **channel** and **owner**. Click **Save** (B).
-
-    ![The Lookup's output](../assets/screens/lab/3-2m-lookup-output.png){ .screenshot }
-
-**Check your progress:** your flow matches the following screenshot, with
-**campaigns_1** connected to **Lookup_1** by a dashed link.
-
-![The Lookup done](../assets/screens/lab/3-2n-lookup-done.png){ .screenshot }
+![The finished batch flow](../assets/screens/lab/3-2f-run-successful.png){ .screenshot }
 
 > **Explainer - Three sources, three formats, one engine**
-> The flow now reads from PostgreSQL, MySQL and a CSV file. The batch engine
+> The flow reads from PostgreSQL, MySQL and a CSV file. The batch engine
 > connects to each source locally through the connections in your project. The
 > flow does not specify *where* it runs. The same flow can run on an engine in
 > another cloud, next to the data in that cloud.
 
-### 3.3 Calculate return on ad spend
-
-In this section, you calculate three metrics per campaign, per day, to answer
-the marketing team's question:
-
-- **Return on ad spend (ROAS)** is revenue divided by spend. A value of 3.0
-  means that every $1 of advertising generated $3 of sales.
-- **Cost per acquisition (CPA)** is the advertising cost of each order.
-- **Click-through rate (CTR)** is the percentage of ad impressions that
-  resulted in a click.
-
-> **Explainer - Transformer and derivations**
-> A **Transformer** stage calculates new columns. Each new column has a
-> **derivation**: a formula based on the incoming columns, written as
-> `<link name>.<column>`. The `If … Then … Else` expression prevents a division
-> by zero on a day with no spend or no orders.
-
-1. In **Find palette nodes**, enter `Transformer`. Drag the **Transformer** (A)
-   and drop it on the link between **Lookup_1** and **Daily_performance_csv**
-   (B). A **Transformer_1** node appears between the two stages.
-
-    ![Drop a Transformer on the link](../assets/screens/lab/3-3a-drop-transformer.png){ .screenshot }
-
-2. Double-click **Transformer_1**.
-
-    ![The Transformer in place](../assets/screens/lab/3-3b-transformer-added.png){ .screenshot }
-
-3. Click the **Output** tab (A), then click **Add column** (B). A new column
-   named **COLUMN_1** appears at the bottom of the list.
-
-    ![Add column](../assets/screens/lab/3-3c-add-column.png){ .screenshot }
-
-4. Click **COLUMN_1** and enter the name `roas` (A). Click the empty
-   **Derivation** cell and enter the following formula (B). Set **Data type**
-   to **DOUBLE** (C).
-
-    ```text
-    If Link_4.spend_usd > 0 Then Link_4.revenue / Link_4.spend_usd Else 0
-    ```
-
-    `Link_4` is the input link of the Transformer stage. If your input link has
-    a different name, use the name that appears in the other derivations in the
-    list.
-
-    ![The roas column](../assets/screens/lab/3-3d-roas-row.png){ .screenshot }
-
-5. Click **Add column** again. Name the new column `cpa_usd` (A), enter the
-   following formula as its **Derivation** (B), and set **Data type** to
-   **DOUBLE** (C).
-
-    ```text
-    If Link_4.orders > 0 Then Link_4.spend_usd / Link_4.orders Else 0
-    ```
-
-    ![The cpa_usd column](../assets/screens/lab/3-3d2-cpa-row.png){ .screenshot }
-
-6. Click **Add column** again. Name the new column `ctr_pct` (A), enter the
-   following formula as its **Derivation** (B), and set **Data type** to
-   **DOUBLE** (C).
-
-    ```text
-    If Link_4.impressions > 0 Then 100.0 * Link_4.clicks / Link_4.impressions Else 0
-    ```
-
-    ![The ctr_pct column](../assets/screens/lab/3-3d3-ctr-row.png){ .screenshot }
-
-7. Verify that the three new columns appear at the bottom of the list, then
-   click **Save and return**.
-
-    ![The three new columns](../assets/screens/lab/3-3e-three-columns.png){ .screenshot }
-
-**Check your progress:** the Transformer stage is located between
-**Lookup_1** and **Daily_performance_csv**.
-
-![The Transformer done](../assets/screens/lab/3-3f-transformer-done.png){ .screenshot }
-
-### 3.4 Load the results and run the flow
-
-The marketing team reads its reports from PostgreSQL, not from files. In this
-section, you replace the CSV target with a PostgreSQL table.
-
-1. Click **Daily_performance_csv** once to select it, then press the
-   **Delete** key. The node is removed. Its link remains on the canvas with an
-   unconnected arrow end.
-
-    ![Select the CSV target](../assets/screens/lab/3-4a-select-csv.png){ .screenshot }
-
-2. In **Find palette nodes**, enter `PostgreSQL`. Drag the standard
-   **PostgreSQL** connector (A), which is the last item in the list, and drop
-   it on the unconnected arrow end (B). The connector is linked to the
-   Transformer stage automatically. If the connector is placed beside the
-   arrow instead, drag the unconnected arrow end onto **PostgreSQL_1**.
-
-    ![Drop PostgreSQL on the arrow](../assets/screens/lab/3-4b-drop-postgres.png){ .screenshot }
-
-3. Double-click **PostgreSQL_1**.
-
-    ![The PostgreSQL target](../assets/screens/lab/3-4c-postgres-added.png){ .screenshot }
-
-4. Expand **View connection** (A) and select **demo_conn_postgres** (B).
-
-    ![The connection](../assets/screens/lab/3-4d-connection.png){ .screenshot }
-
-5. Set **Schema name** to `shop` (A) and **Table name** to
-   `campaign_performance` (B). Expand **Table action** and select **Truncate**
-   (C). With this setting, each run empties the table before it loads the new
-   results, so repeated runs do not duplicate rows.
-
-    ![Schema, table and table action](../assets/screens/lab/3-4e-schema-table.png){ .screenshot }
-
-6. Verify that **Table action** shows **Truncate** (A), then click **Save** (B).
-
-    ![Truncate, then Save](../assets/screens/lab/3-4f-truncate-save.png){ .screenshot }
-
-7. Click **Compile**.
-
-    ![Compile](../assets/screens/lab/3-4g-compile.png){ .screenshot }
-
-8. Wait until **Compile successful** appears, then click **Run flow**.
-
-    ![Run flow](../assets/screens/lab/3-4h-run-flow.png){ .screenshot }
-
-**Check your progress:** the banner displays **Run successful**. The link into
-**PostgreSQL_1** displays **720 rows**, the same count as the join. The dashed
-link from the campaign catalogue displays **8 rows**.
-
-![The finished batch flow](../assets/screens/lab/3-4i-run-done.png){ .screenshot }
-
-### 3.5 Review the results
+### 3.3 Review the results
 
 The table now contains one row per campaign per day, including the three
-metrics that you calculated. In this section, you review the results from the
+metrics that the flow calculated. In this section, you review the results from the
 canvas.
 
-1. Double-click **PostgreSQL_1**, scroll to the bottom of the **Stage** tab and
-   click **Preview data**. The preview now reads the table that your flow
-   loaded.
+1. Double-click **Campaign_performance_table**, scroll to the bottom of the
+   **Stage** tab and click **Preview data**. The preview reads the table that
+   the flow loaded.
 
     ![Preview the results](../assets/screens/lab/3-4j-preview-button.png){ .screenshot }
 
@@ -576,7 +436,7 @@ prospecting returns approximately 50 cents for every $1 spent, so its verdict
 is *cut*. This result is the recommendation for the marketing team. In
 part 4, you apply it to live data.
 
-### 3.6 Monitor your remote engine
+### 3.4 Monitor your remote engine
 
 Your jobs ran on the batch engine in your environment, not in IBM Cloud. In
 this section, you monitor the engine from the project while it processes a
@@ -607,7 +467,7 @@ engine.
 
     ![The engine, idle](../assets/screens/lab/3-5b-ds-engine-idle.png){ .screenshot }
 
-6. Switch to the tab that contains the **Marketing Performance - DRAFT** flow
+6. Switch to the tab that contains the **Marketing Performance - COMPLETED** flow
    and click **Run** in the toolbar. The flow is already compiled, so the job
    is submitted directly to the engine.
 
@@ -641,7 +501,7 @@ the control plane, shows how the job reached the engine.
     - **C** - `Processing pullJobWork request`: the engine retrieves the job.
       Because the flow is already compiled, the engine skips compilation. A
       flow that is not compiled is compiled first, on the engine.
-    - **D** - `Running job with flow name Marketing Performance - DRAFT`:
+    - **D** - `Running job with flow name Marketing Performance - COMPLETED`:
       the engine runs the job. The engine connects to PostgreSQL, MySQL and
       the CSV file, performs the join, lookup and calculations, and loads the
       results. All processing takes place next to the data.
@@ -658,7 +518,7 @@ the control plane, shows how the job reached the engine.
 
 Most shoppers who add an item to their cart leave without completing a
 purchase. Some of these abandoned carts justify a reminder or an offer, and
-others do not. The scorecard that you built in part 3 identifies which
+others do not. The scorecard from part 3 identifies which
 carts to pursue. A cart from a **scale** campaign is worth pursuing, and a cart
 from a **cut** campaign is not.
 
@@ -676,9 +536,9 @@ plane (03).
 
 *You design the flow, the engine translates it into a Flink job, and the Flink platform in your environment runs the job.*
 
-**Current task:** the streaming portion of the lab. The starting flow already
-joins carts to orders. You add the totals per campaign and the verdict from
-part 3.
+**Current task:** the streaming portion of the lab. You run a starting flow
+that joins carts to orders. You then explore and run the finished flow, which
+adds the totals per campaign and the verdict from part 3.
 
 > **Explainer - Kafka topics and events**
 > The website sends every click and every order to **Kafka** as an **event**:
@@ -849,9 +709,406 @@ the flow running.
     > from your stages. When you stop the flow, the cluster is removed.
 
 10. Switch to the browser tab that contains the **Storefront Live - DRAFT**
-    flow. Keep the Control Center tab open; you return to it in section 4.5.
+    flow. Keep the Control Center tab open; you return to it in section 4.4.
 
-### 4.3 Add cart value by campaign
+### 4.3 Explore and run the finished flow
+
+The join produces one record per cart, which is too detailed for a marketing
+team that plans by campaign. The finished flow, **Storefront Live -
+COMPLETED**, adds two stages to the starting flow. The first totals the carts
+per campaign every 5 minutes. The second attaches the verdict that the batch
+flow calculated in part 3. In this section, you examine both stages and then
+run the flow.
+
+1. In the **Storefront Live - DRAFT** flow, click **Stop**, and wait until the
+   **Run** button is displayed again. Only one flow runs at a time in this
+   lab.
+2. In the breadcrumb at the top of the page, click the name of your project.
+   Then click **Storefront Live - COMPLETED** in the list of flows. The flow
+   opens on the canvas.
+3. Locate the two stages that the starting flow does not contain: **Cart
+   value by campaign** (A) and **Campaign verdict** (B).
+
+    ![The finished streaming flow](../assets/screens/lab/4-3a-completed-stream.png){ .screenshot }
+
+4. Click **Cart value by campaign** once. The stage settings open on the
+   right. This **Windowing Aggregator** stage uses a **TUMBLING** window of
+   **300000** milliseconds, which is 5 minutes (A). **Grouping** is set to
+   **/cart_campaign_id** (B), so the stage emits one result per campaign
+   every 5 minutes.
+
+    ![The window and the grouping](../assets/screens/lab/4-3b-window-grouping.png){ .screenshot }
+
+5. Expand **Aggregations**. The three entries calculate the **number** of
+   carts (**carts**), the **total value** of those carts (**cart_value**), and
+   the **total of the matching orders** (**converted_revenue**). An abandoned
+   cart has an empty order total, so it adds to the cart value but not to the
+   converted revenue. Click **Cancel**.
+
+    ![The three totals](../assets/screens/lab/4-3c-aggregations.png){ .screenshot }
+
+6. Click **Campaign verdict** once. This **JDBC Lookup** stage queries the
+   campaign scorecard in PostgreSQL for each result (A). The scorecard is a
+   view over the table that your batch flow loaded in part 3. **Missing Values
+   Behavior** is set to **Pass the record along the pipeline unchanged** (B),
+   so results from shoppers who arrived without a campaign are kept. Click
+   **Cancel**.
+
+    ![The scorecard query](../assets/screens/lab/4-3d-verdict-query.png){ .screenshot }
+
+    > **Explainer - Batch results in a live stream**
+    > The **JDBC Lookup** stage queries a database for each record that passes
+    > through it. JDBC is the standard interface that Java programs use to
+    > access databases. The batch flow processes 90 days of history once a
+    > day, and the streaming flow reuses that result in milliseconds for every
+    > record.
+
+7. Click the **Validate** checkmark in the toolbar. Verify that the banner
+   displays **Validation successful, no issues found**.
+8. Click **Run** in the toolbar.
+9. If the **Select offset** window opens, select **Restart from initial
+   offset** (A) and click **Start run** (B).
+
+    ![Restart from initial offset](../assets/screens/lab/4-3e-offset.png){ .screenshot }
+
+    !!! warning "Always choose Restart from initial offset here"
+        On this engine, the default option, **Continue from last-saved
+        offset**, can fail within two minutes with the error *"No Kafka
+        partitions found"*. **Restart from initial offset** starts a new job
+        that reads the topics from the current time onward.
+
+10. Wait until the status changes to **Job Running**.
+
+    ![Job Running](../assets/screens/lab/4-3f-job-running.png){ .screenshot }
+
+**Check your progress:** the first window after the job starts contains
+partial data, so wait approximately 10 minutes. Then click **Campaign
+verdict**. The **Real time summary** displays the per-campaign results
+received and the results emitted with their verdict. While you wait, continue
+with section 4.4.
+
+### 4.4 View the results in Kafka
+
+Every 5 minutes, the topic `shop.cart_conversion` receives one record per
+campaign. In this section, you view the records in Control Center and review
+your new Flink job.
+
+1. Switch to the Control Center tab. Click **Flink**, then **flink-env**, then
+   **Applications**. Your new job is the `app-` application in the **Running**
+   state. This application is a new Flink cluster that started when you
+   clicked **Start run**.
+
+    ![Your new Flink job](../assets/screens/lab/4-5a-cc-new-job.png){ .screenshot }
+
+2. In the left menu, click **Home**, then click **controlcenter.cluster**.
+
+    ![The Kafka cluster](../assets/screens/lab/4-5b-cc-cluster.png){ .screenshot }
+
+3. Click **Topics** (A), then click **shop.cart_conversion** (B).
+
+    ![The results topic](../assets/screens/lab/4-5c-cc-topic.png){ .screenshot }
+
+4. Click the **Messages** tab (A). New records appear every 5 minutes, one per
+   campaign. Click a record (B) to view its content.
+
+    ![The results, record by record](../assets/screens/lab/4-5d-cc-messages.png){ .screenshot }
+
+The following two records are from an actual run:
+
+```json
+{"cart_campaign_id": "SRCH-BRAND-Q4", "carts": 54.0, "cart_value": 6687.0, "converted_revenue": 539.0,
+ "campaign_name": "Brand search, Q4", "roas": 10.28, "verdict": "scale"}
+{"cart_campaign_id": "DISP-PROSPECTING", "carts": 9.0, "cart_value": 1182.0, "converted_revenue": 966.0,
+ "campaign_name": "Display prospecting", "roas": 0.54, "verdict": "cut"}
+```
+
+The **roas** and **verdict** values are the values that your batch flow
+calculated in part 3. The batch result is now attached to every live
+record. In this 5-minute window, brand search shoppers added $6,687 to their
+carts and paid $539. More than $6,000 remains in abandoned carts from a
+campaign that returns $10 for every $1. Based on this result, the e-commerce
+team sends a reminder to those shoppers immediately and does not pursue carts
+from **cut** campaigns.
+
+### 4.5 Review the business impact
+
+Your two flows support decisions by the Summit Outfitters marketing and
+e-commerce teams. To view these decisions from the perspective of the
+business teams, open the Summit Outfitters demo site. The site uses the same
+storefront, campaigns and scorecard as your lab, with simulated shoppers.
+
+1. Open the storefront:
+   [summit-outfitters.23ij0n2ztu5p.ca-tor.codeengine.appdomain.cloud](https://summit-outfitters.23ij0n2ztu5p.ca-tor.codeengine.appdomain.cloud/).
+   The feed displays shoppers who click, add items to their cart and place
+   orders. Each event is tagged with the campaign that referred the shopper.
+   These events are the events in `shop.clicks` and `shop.orders`.
+
+    ![The Summit Outfitters storefront](../assets/screens/lab/4-6a-summit-store.png){ .screenshot }
+
+2. Click **Marketing dashboard**. For each campaign, the dashboard displays
+   the carts, cart value and converted revenue (from your Flink flow), the
+   revenue remaining in abandoned carts, and the return on ad spend and verdict
+   (from your batch flow). The headline value is the current abandoned-cart
+   revenue from **scale** campaigns only, which is the revenue worth
+   recovering.
+
+    ![The real-time marketing dashboard](../assets/screens/lab/4-6b-summit-dashboard.png){ .screenshot }
+
+## 5 Summary
+
+In this lab, you answered two business questions from one project. Each
+workload ran on the appropriate runtime, inside the environment where the data
+resides.
+
+**Key Features & Benefits**
+
+**Design once, run anywhere** – Design pipelines in one fully managed control
+plane on IBM Cloud, and run them on remote engines in any cloud, data center or
+private network. Data is processed where it resides, which reduces data
+transfer costs and latency.
+
+**The right runtime for every workload** – Use the batch engine
+for joins, lookups and transformations over historical data. Use the streaming
+engine, built on Apache Flink, for time windows and stream joins over live
+events. Both runtimes share the same project and the same canvas.
+
+**Any source, any format** – Read from PostgreSQL, MySQL, CSV files on the
+local disk of the engine and Kafka events, through the connections in your
+project.
+
+**Batch insight, real-time action** – The verdict that the batch flow calculated over
+90 days of history drives a decision on every live shopping cart.
+
+## 6 Reference
+
+- [watsonx.data integration documentation](https://dataplatform.cloud.ibm.com/docs/content/wsj/getting-started/welcome-main.html?context=df)
+- [Confluent Platform documentation](https://docs.confluent.io/platform/current/overview.html)
+
+## Appendix: Build the additions yourself (optional)
+
+In parts 3 and 4, you explored the finished flows. If you have time after
+the lab, or want to practise designing flows, build the same additions
+yourself in the starting flows. Sections A.1 to A.3 extend
+**Marketing Performance - DRAFT**, and sections A.4 and A.5 extend
+**Storefront Live - DRAFT**. The finished flows show the expected result.
+
+### A.1 Add the campaign catalogue from MySQL
+
+Campaign identifiers such as `DISP-PROSPECTING` are difficult to interpret. The
+marketing team stores the campaign details, including the name, channel and
+owner, in its own MySQL database. In this section, you add those details with a
+**Lookup** stage.
+
+1. Click **Add asset to canvas +**.
+
+    ![Add asset to canvas](../assets/screens/lab/3-2a-add-asset.png){ .screenshot }
+
+2. Click the **›** next to **Connection**.
+
+    ![Connection](../assets/screens/lab/3-2b-connection.png){ .screenshot }
+
+3. Click the **›** next to **demo_conn_mysql**.
+
+    ![demo_conn_mysql](../assets/screens/lab/3-2c-mysql.png){ .screenshot }
+
+4. Click the **›** next to **demodb**.
+
+    ![demodb](../assets/screens/lab/3-2d-demodb.png){ .screenshot }
+
+5. Select **campaigns** (A). Wait until **Selected assets** shows **1 / 1** (B),
+   then click **Add** (C). A **campaigns_1** node appears on the canvas.
+
+    ![The campaigns table](../assets/screens/lab/3-2e-pick-campaigns.png){ .screenshot }
+
+6. In **Find palette nodes**, enter `Lookup` (A). Drag the **Lookup** stage
+   listed under **Processing** (B), not *Lookup file set*. Drop it on the link
+   between **Join_on_campaign_and_day** and **Daily_performance_csv** (C). A
+   **Lookup_1** node appears between the two stages.
+
+    ![Drop a Lookup on the link](../assets/screens/lab/3-2f-drop-lookup.png){ .screenshot }
+
+7. Hover over **campaigns_1** (A) and drag from its right edge to
+   **Lookup_1** (B). The new link is dashed. This dashed link is the
+   **reference** link from which the Lookup stage reads.
+
+    ![Connect the campaigns table](../assets/screens/lab/3-2g-connect-campaigns.png){ .screenshot }
+
+    > **Explainer - Lookups**
+    > A **Lookup** stage adds details to each row from a reference table. The
+    > solid link carries the rows to enrich. The dashed **reference** link
+    > carries the table that supplies the details. The **key** is the column
+    > that both inputs share, in this case `campaign_id`.
+
+8. Double-click **Lookup_1**.
+
+    ![The Lookup in place](../assets/screens/lab/3-2h-lookup-connected.png){ .screenshot }
+
+9. Click the **Input** tab (A). Set **Input name** to **Link_3** (B), which is
+    the dashed campaigns link, then click **Edit** (C).
+
+    ![The reference link](../assets/screens/lab/3-2i-reference-link.png){ .screenshot }
+
+10. Select the **Key** checkbox for **campaign_id** (A) and click **Apply and
+    return** (B).
+
+    ![Mark the key](../assets/screens/lab/3-2j-set-key.png){ .screenshot }
+
+11. Click the **Stage** tab (A). Expand **Key expression** (B) and select
+    **campaign_id** (C).
+
+    ![The key expression](../assets/screens/lab/3-2k-key-expression.png){ .screenshot }
+
+12. Expand **Lookup failure** (A) and select **Continue** (B). With this
+    setting, a day with an unknown campaign is retained instead of causing the
+    job to fail.
+
+    ![Lookup failure: Continue](../assets/screens/lab/3-2l-lookup-failure.png){ .screenshot }
+
+13. Click the **Output** tab (A). Each row now includes the catalogue columns,
+    such as **campaign_name**, **channel** and **owner**. Click **Save** (B).
+
+    ![The Lookup's output](../assets/screens/lab/3-2m-lookup-output.png){ .screenshot }
+
+**Check your progress:** your flow matches the following screenshot, with
+**campaigns_1** connected to **Lookup_1** by a dashed link.
+
+![The Lookup done](../assets/screens/lab/3-2n-lookup-done.png){ .screenshot }
+
+> **Explainer - Three sources, three formats, one engine**
+> The flow now reads from PostgreSQL, MySQL and a CSV file. The batch engine
+> connects to each source locally through the connections in your project. The
+> flow does not specify *where* it runs. The same flow can run on an engine in
+> another cloud, next to the data in that cloud.
+
+### A.2 Calculate return on ad spend
+
+In this section, you calculate three metrics per campaign, per day, to answer
+the marketing team's question:
+
+- **Return on ad spend (ROAS)** is revenue divided by spend. A value of 3.0
+  means that every $1 of advertising generated $3 of sales.
+- **Cost per acquisition (CPA)** is the advertising cost of each order.
+- **Click-through rate (CTR)** is the percentage of ad impressions that
+  resulted in a click.
+
+> **Explainer - Transformer and derivations**
+> A **Transformer** stage calculates new columns. Each new column has a
+> **derivation**: a formula based on the incoming columns, written as
+> `<link name>.<column>`. The `If … Then … Else` expression prevents a division
+> by zero on a day with no spend or no orders.
+
+1. In **Find palette nodes**, enter `Transformer`. Drag the **Transformer** (A)
+   and drop it on the link between **Lookup_1** and **Daily_performance_csv**
+   (B). A **Transformer_1** node appears between the two stages.
+
+    ![Drop a Transformer on the link](../assets/screens/lab/3-3a-drop-transformer.png){ .screenshot }
+
+2. Double-click **Transformer_1**.
+
+    ![The Transformer in place](../assets/screens/lab/3-3b-transformer-added.png){ .screenshot }
+
+3. Click the **Output** tab (A), then click **Add column** (B). A new column
+   named **COLUMN_1** appears at the bottom of the list.
+
+    ![Add column](../assets/screens/lab/3-3c-add-column.png){ .screenshot }
+
+4. Click **COLUMN_1** and enter the name `roas` (A). Click the empty
+   **Derivation** cell and enter the following formula (B). Set **Data type**
+   to **DOUBLE** (C).
+
+    ```text
+    If Link_4.spend_usd > 0 Then Link_4.revenue / Link_4.spend_usd Else 0
+    ```
+
+    `Link_4` is the input link of the Transformer stage. If your input link has
+    a different name, use the name that appears in the other derivations in the
+    list.
+
+    ![The roas column](../assets/screens/lab/3-3d-roas-row.png){ .screenshot }
+
+5. Click **Add column** again. Name the new column `cpa_usd` (A), enter the
+   following formula as its **Derivation** (B), and set **Data type** to
+   **DOUBLE** (C).
+
+    ```text
+    If Link_4.orders > 0 Then Link_4.spend_usd / Link_4.orders Else 0
+    ```
+
+    ![The cpa_usd column](../assets/screens/lab/3-3d2-cpa-row.png){ .screenshot }
+
+6. Click **Add column** again. Name the new column `ctr_pct` (A), enter the
+   following formula as its **Derivation** (B), and set **Data type** to
+   **DOUBLE** (C).
+
+    ```text
+    If Link_4.impressions > 0 Then 100.0 * Link_4.clicks / Link_4.impressions Else 0
+    ```
+
+    ![The ctr_pct column](../assets/screens/lab/3-3d3-ctr-row.png){ .screenshot }
+
+7. Verify that the three new columns appear at the bottom of the list, then
+   click **Save and return**.
+
+    ![The three new columns](../assets/screens/lab/3-3e-three-columns.png){ .screenshot }
+
+**Check your progress:** the Transformer stage is located between
+**Lookup_1** and **Daily_performance_csv**.
+
+![The Transformer done](../assets/screens/lab/3-3f-transformer-done.png){ .screenshot }
+
+### A.3 Load the results and run the flow
+
+The marketing team reads its reports from PostgreSQL, not from files. In this
+section, you replace the CSV target with a PostgreSQL table.
+
+1. Click **Daily_performance_csv** once to select it, then press the
+   **Delete** key. The node is removed. Its link remains on the canvas with an
+   unconnected arrow end.
+
+    ![Select the CSV target](../assets/screens/lab/3-4a-select-csv.png){ .screenshot }
+
+2. In **Find palette nodes**, enter `PostgreSQL`. Drag the standard
+   **PostgreSQL** connector (A), which is the last item in the list, and drop
+   it on the unconnected arrow end (B). The connector is linked to the
+   Transformer stage automatically. If the connector is placed beside the
+   arrow instead, drag the unconnected arrow end onto **PostgreSQL_1**.
+
+    ![Drop PostgreSQL on the arrow](../assets/screens/lab/3-4b-drop-postgres.png){ .screenshot }
+
+3. Double-click **PostgreSQL_1**.
+
+    ![The PostgreSQL target](../assets/screens/lab/3-4c-postgres-added.png){ .screenshot }
+
+4. Expand **View connection** (A) and select **demo_conn_postgres** (B).
+
+    ![The connection](../assets/screens/lab/3-4d-connection.png){ .screenshot }
+
+5. Set **Schema name** to `shop` (A) and **Table name** to
+   `campaign_performance` (B). Expand **Table action** and select **Truncate**
+   (C). With this setting, each run empties the table before it loads the new
+   results, so repeated runs do not duplicate rows.
+
+    ![Schema, table and table action](../assets/screens/lab/3-4e-schema-table.png){ .screenshot }
+
+6. Verify that **Table action** shows **Truncate** (A), then click **Save** (B).
+
+    ![Truncate, then Save](../assets/screens/lab/3-4f-truncate-save.png){ .screenshot }
+
+7. Click **Compile**.
+
+    ![Compile](../assets/screens/lab/3-4g-compile.png){ .screenshot }
+
+8. Wait until **Compile successful** appears, then click **Run flow**.
+
+    ![Run flow](../assets/screens/lab/3-4h-run-flow.png){ .screenshot }
+
+**Check your progress:** the banner displays **Run successful**. The link into
+**PostgreSQL_1** displays **720 rows**, the same count as the join. The dashed
+link from the campaign catalogue displays **8 rows**.
+
+![The finished batch flow](../assets/screens/lab/3-4i-run-done.png){ .screenshot }
+
+### A.4 Add cart value by campaign
 
 The join produces one record per cart. This level of detail is too granular
 for a marketing team that plans by campaign. The team needs the following
@@ -937,7 +1194,7 @@ records by campaign and totals them in 5-minute tumbling windows.
 
     ![Save](../assets/screens/lab/4-2g-aggregations-saved.png){ .screenshot }
 
-### 4.4 Add the campaign verdict from your batch scorecard
+### A.5 Add the campaign verdict from your batch scorecard
 
 The totals per campaign show the e-commerce team how much revenue remains
 in abandoned carts. They do not indicate whether to pursue it. A cart from
@@ -1035,100 +1292,3 @@ verdict**. The **Real time summary** displays the per-campaign results received
 (A) and the results emitted with their verdict (B).
 
 ![Your streaming job's live metrics](../assets/screens/lab/4-3h-stream-metrics.png){ .screenshot }
-
-### 4.5 View the results in Kafka
-
-Every 5 minutes, the topic `shop.cart_conversion` receives one record per
-campaign. In this section, you view the records in Control Center and review
-your new Flink job.
-
-1. Switch to the Control Center tab. Click **Flink**, then **flink-env**, then
-   **Applications**. Your new job is the `app-` application in the **Running**
-   state. This application is a new Flink cluster that started when you
-   clicked **Start run**.
-
-    ![Your new Flink job](../assets/screens/lab/4-5a-cc-new-job.png){ .screenshot }
-
-2. In the left menu, click **Home**, then click **controlcenter.cluster**.
-
-    ![The Kafka cluster](../assets/screens/lab/4-5b-cc-cluster.png){ .screenshot }
-
-3. Click **Topics** (A), then click **shop.cart_conversion** (B).
-
-    ![The results topic](../assets/screens/lab/4-5c-cc-topic.png){ .screenshot }
-
-4. Click the **Messages** tab (A). New records appear every 5 minutes, one per
-   campaign. Click a record (B) to view its content.
-
-    ![The results, record by record](../assets/screens/lab/4-5d-cc-messages.png){ .screenshot }
-
-The following two records are from an actual run:
-
-```json
-{"cart_campaign_id": "SRCH-BRAND-Q4", "carts": 54.0, "cart_value": 6687.0, "converted_revenue": 539.0,
- "campaign_name": "Brand search, Q4", "roas": 10.28, "verdict": "scale"}
-{"cart_campaign_id": "DISP-PROSPECTING", "carts": 9.0, "cart_value": 1182.0, "converted_revenue": 966.0,
- "campaign_name": "Display prospecting", "roas": 0.54, "verdict": "cut"}
-```
-
-The **roas** and **verdict** values are the values that your batch flow
-calculated in part 3. The batch result is now attached to every live
-record. In this 5-minute window, brand search shoppers added $6,687 to their
-carts and paid $539. More than $6,000 remains in abandoned carts from a
-campaign that returns $10 for every $1. Based on this result, the e-commerce
-team sends a reminder to those shoppers immediately and does not pursue carts
-from **cut** campaigns.
-
-### 4.6 Review the business impact
-
-Your two flows support decisions by the Summit Outfitters marketing and
-e-commerce teams. To view these decisions from the perspective of the
-business teams, open the Summit Outfitters demo site. The site uses the same
-storefront, campaigns and scorecard as your lab, with simulated shoppers.
-
-1. Open the storefront:
-   [summit-outfitters.23ij0n2ztu5p.ca-tor.codeengine.appdomain.cloud](https://summit-outfitters.23ij0n2ztu5p.ca-tor.codeengine.appdomain.cloud/).
-   The feed displays shoppers who click, add items to their cart and place
-   orders. Each event is tagged with the campaign that referred the shopper.
-   These events are the events in `shop.clicks` and `shop.orders`.
-
-    ![The Summit Outfitters storefront](../assets/screens/lab/4-6a-summit-store.png){ .screenshot }
-
-2. Click **Marketing dashboard**. For each campaign, the dashboard displays
-   the carts, cart value and converted revenue (from your Flink flow), the
-   revenue remaining in abandoned carts, and the return on ad spend and verdict
-   (from your batch flow). The headline value is the current abandoned-cart
-   revenue from **scale** campaigns only, which is the revenue worth
-   recovering.
-
-    ![The real-time marketing dashboard](../assets/screens/lab/4-6b-summit-dashboard.png){ .screenshot }
-
-## 5 Summary
-
-In this lab, you answered two business questions from one project. Each
-workload ran on the appropriate runtime, inside the environment where the data
-resides.
-
-**Key Features & Benefits**
-
-**Design once, run anywhere** – Design pipelines in one fully managed control
-plane on IBM Cloud, and run them on remote engines in any cloud, data center or
-private network. Data is processed where it resides, which reduces data
-transfer costs and latency.
-
-**The right runtime for every workload** – Use the batch engine
-for joins, lookups and transformations over historical data. Use the streaming
-engine, built on Apache Flink, for time windows and stream joins over live
-events. Both runtimes share the same project and the same canvas.
-
-**Any source, any format** – Read from PostgreSQL, MySQL, CSV files on the
-local disk of the engine and Kafka events, through the connections in your
-project.
-
-**Batch insight, real-time action** – The verdict that the batch flow calculated over
-90 days of history drives a decision on every live shopping cart.
-
-## 6 Reference
-
-- [watsonx.data integration documentation](https://dataplatform.cloud.ibm.com/docs/content/wsj/getting-started/welcome-main.html?context=df)
-- [Confluent Platform documentation](https://docs.confluent.io/platform/current/overview.html)
