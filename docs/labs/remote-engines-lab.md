@@ -704,44 +704,53 @@ Kafka. Each job runs on its own dedicated Flink cluster. You open the cluster
 from Control Center, the web console of the Kafka and Flink platform. Leave
 the flow running.
 
-1. Copy the **Demo Builder** link from your TechZone reservation page and
-   paste it into a new tab. Click **Environment**, and then click the
-   **Confluent Platform** tile. This is the only step of the lab that uses
-   the Demo Builder: it shows the address of your environment's consoles.
+1. Go to the browser tab that contains your TechZone reservation page. Under
+   **Post-deployment text output**, click **Open the Demo Builder**. The
+   Demo Builder opens in a new tab. This is the only part of the lab that
+   uses the Demo Builder: it shows the address of your environment's
+   consoles.
+
+    ![Open the Demo Builder](../assets/screens/lab2/4-2a-open-demo-builder.png){ .screenshot }
+
+2. Click **Environment**.
+
+    ![The Environment card](../assets/screens/lab2/4-2b-environment-card.png){ .screenshot }
+
+3. Click the **Confluent Platform** tile.
 
     ![The Confluent Platform tile](../assets/screens/lab/4-1g-cp-tile.png){ .screenshot }
 
-2. Click **Open Control Center** (B). Control Center opens in a new tab.
+4. Click **Open Control Center** (B). Control Center opens in a new tab.
 
     ![Open Control Center](../assets/screens/lab/4-1h-cp-drawer.png){ .screenshot }
 
-3. Sign in with the username `admin` and the password `IBMDem0s1` (the
+5. Sign in with the username `admin` and the password `IBMDem0s1` (the
    character after "Dem" is the digit zero, not the letter O).
 
-4. In the left menu, click **Flink**.
+6. In the left menu, click **Flink**.
 
     ![Control Center](../assets/screens/lab/4-1i-cc-home.png){ .screenshot }
 
-5. Click **flink-env**, which is your Flink environment.
+7. Click **flink-env**, which is your Flink environment.
 
     ![The Flink environment](../assets/screens/lab/4-1j-cc-flink-envs.png){ .screenshot }
 
-6. Click **Applications**.
+8. Click **Applications**.
 
     ![flink-env](../assets/screens/lab/4-1k-cc-flink-env.png){ .screenshot }
 
-7. Locate your job: the application whose name starts with `app-` (A) and
+9. Locate your job: the application whose name starts with `app-` (A) and
    whose state is **Running**. Click **View Flink UI** (B) for that
    application.
 
     ![The Flink applications](../assets/screens/lab/4-1l-cc-apps.png){ .screenshot }
 
-8. The **Apache Flink Dashboard** for the job cluster opens. Under **Running
+10. The **Apache Flink Dashboard** for the job cluster opens. Under **Running
    Job List**, click your job.
 
     ![The Flink dashboard](../assets/screens/lab/4-1m-flink-overview.png){ .screenshot }
 
-9. Verify that the job status is **RUNNING** (A). The graph shows each step of
+11. Verify that the job status is **RUNNING** (A). The graph shows each step of
    your flow as a Flink **operator**, from the two Kafka sources on the left to
    the writer on the right. Scroll down to the table. The **Records Sent**
    value (B) increases as shoppers click.
@@ -754,7 +763,7 @@ the flow running.
         next to Kafka. Each box in the graph is an **operator** that is generated
         from your stages. When you stop the flow, the cluster is removed.
 
-10. Switch to the browser tab that contains the **Storefront Live - DRAFT**
+12. Switch to the browser tab that contains the **Storefront Live - DRAFT**
     flow. Keep the Control Center tab open; you return to it in section 4.4.
 
 ### 4.3 Explore and run the finished flow
