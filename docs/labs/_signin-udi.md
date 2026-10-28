@@ -37,7 +37,6 @@ environment, a **user name** and a **password**.
     | 29 | `itz-saas-230` | `652b9988dda74569b72459789ee069ff/WQpVJtNCrs` | `student0@6adb62313df8aede3c90cf0d.techzone.com` | `OW8Wa5cCI2QdJ29D` |
     | 30 | `itz-saas-597` | `db6b0101ea084e8f83633e8f4b0518a3/wPOcriTstF` | `student0@6adba01545db757cf96924f7.techzone.com` | `55ekJWaHBEZKZ4XW` |
     | 33 | `itz-saas-933` | `f269966e668049699bee4ee493508062/ojsPAAvtFQ` | `student0@6adbb5c374a8d89e75b71124.techzone.com` | `IMdCzT#2-4Z!-ZHe` |
-    | 34 | `itz-saas-390` | `0c41b6d6a1a4475fbd91ae67d7cd9593/UBN7AqPMNO` | `student0@6adba01a836b50a6c374fd9b.techzone.com` | `QjuSJzQRVn6TA43R` |
 
 1. In the table, find the row of your seat. Keep the row visible: you copy
    from it in steps 4 and 5.
