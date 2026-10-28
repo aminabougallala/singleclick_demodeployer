@@ -47,12 +47,19 @@ need: the identifier of your environment and the user names and passwords.
     The first time you sign in, the page **Provide your information to
     continue** can open. Click **Continue**.
 
+7. The first time you sign in, a **Welcome to watsonx** window opens. Select
+   the check box that accepts the terms (A), and then click **Continue** (B).
+
+    ![Accept the terms](../assets/screens/udi2/2-1a-welcome.png){ .screenshot }
+
+8. The window shows **Invite users**. Click **Skip**.
+
+    ![Skip the invitation](../assets/screens/udi2/2-1b-invite-skip.png){ .screenshot }
+
+    If a short tour starts on the home page, close it with the **X**.
+
 **Check your progress:** the IBM watsonx home page opens. The top bar shows
 your TechZone account, whose name starts with `itz-saas-` (A), and the region
 **Toronto** (B). Keep this tab open. You use it for the rest of the lab.
 
 ![The home page after sign-in](../assets/screens/signin/signin-6-home.png){ .screenshot }
-
-!!! tip "A page shows Something went wrong or 429 Too many requests?"
-    The platform limits how many requests one account can send in a short
-    time. Wait one minute, and then reload the page. Your work is not lost.
