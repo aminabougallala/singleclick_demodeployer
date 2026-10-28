@@ -110,7 +110,7 @@ and *"Why did a customer send back a tent?"*, without manual data entry.
     **A**, **B** and **C** give their order. Names and numbers in the
     screenshots, such as the account name `itz-saas-390`, differ from yours.
 
---8<-- "labs/_signin.md"
+--8<-- "labs/_signin-udi.md"
 
 ### 2.2 Create a task credential
 
