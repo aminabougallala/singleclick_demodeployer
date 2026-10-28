@@ -48,12 +48,12 @@ from the engine.
 
 *The control plane runs in the IBM network and the remote engine runs in yours. They communicate through outbound calls only.*
 
-> **Explainer - Control plane, data plane and remote engines**
-> The **control plane** is watsonx.data integration on IBM Cloud. It stores
-> your projects, flows, jobs and connections. The **data plane** is your own
-> network, where the processing takes place. A **remote engine** is a container
-> in the data plane that polls the control plane for work and processes it next
-> to your data. The control plane never connects into your network.
+!!! explainer "Control plane, data plane and remote engines"
+    The **control plane** is watsonx.data integration on IBM Cloud. It stores
+    your projects, flows, jobs and connections. The **data plane** is your own
+    network, where the processing takes place. A **remote engine** is a container
+    in the data plane that polls the control plane for work and processes it next
+    to your data. The control plane never connects into your network.
 
 Each business question also requires an appropriate runtime. This lab uses two
 runtimes. The **remote batch engine** is designed for batch processing:
@@ -81,34 +81,36 @@ verdict to every live shopping cart.
 
 ### 1.2 Where Summit's data lives
 
-In the Summit Outfitters scenario, the data is distributed across two clouds
-and a data center. In this lab, a single server hosts all of these sources
-so that you can observe every component. The flows behave identically when
-each source is in a separate location with an engine deployed next to it.
+In the Summit Outfitters scenario, the data is spread across two clouds and a
+data center, with a remote engine deployed next to each source. In this lab,
+one server hosts every source and both engines, so that you can see every
+component. The flows behave the same way when each source is in its own
+location.
 
-The following list shows the location of each source in the lab. The name that
-appears on the canvas is shown in **bold**:
+```mermaid
+flowchart LR
+  subgraph IBM["IBM Cloud: control plane"]
+    P["Your project<br/>flows, jobs, connections"]
+  end
+  subgraph YOU["Your environment: data plane"]
+    BE["Remote batch engine"]
+    SE["Streaming engine<br/>(Apache Flink)"]
+    PG[("PostgreSQL<br/>order system")]
+    MY[("MySQL<br/>marketing catalogue")]
+    CSV["ad_spend.csv<br/>ad platform exports"]
+    K[["Kafka<br/>website clicks and orders"]]
+  end
+  BE -- polls for work --> P
+  SE -- polls for work --> P
+  BE --- PG
+  BE --- MY
+  BE --- CSV
+  SE --- K
+  SE --- PG
+```
 
-- **Daily_orders**: 90 days of orders, from the PostgreSQL table
-  `shop.orders_history` (the Summit order system).
-- **Ad_spend_export**: daily advertising spend, from the file `ad_spend.csv` on
-  the local disk of the batch engine (the exports from the advertising
-  platforms).
-- **Campaign_catalogue**: the campaign catalogue, from the MySQL table
-  `campaigns` (the marketing team's database).
-- **Storefront clicks** and **Storefront orders**: live website events, from
-  the Kafka topics `shop.clicks` and `shop.orders`.
-
-The batch flow writes its results to PostgreSQL. The streaming flow writes one
-result for each campaign every 5 minutes to the Kafka topic
-`shop.cart_conversion`.
-
-> **Explainer - Connections**
-> A **connection** is a saved, reusable set of credentials for a data source,
-> stored in your project. Your environment includes one connection per
-> database, named `demo_conn_postgres`, `demo_conn_mysql` and so on. A flow
-> references the connection instead of a password. The engine uses the
-> connection to reach the data from where the engine runs.
+*The engines call out to the control plane for work and read the data next
+to them. No data leaves your environment.*
 
 ## 2 Getting started
 
@@ -128,55 +130,18 @@ result for each campaign every 5 minutes to the Kafka topic
 
 --8<-- "labs/_signin.md"
 
-### 2.2 Open your project
+### 2.2 Create a task credential
 
-Your environment is prepared before the session: the lab data, the simulated
-website traffic and four flows are already in your project.
+Create the task credential first. Every job in this lab runs under your own
+identity through it. You create a task credential once per account; if one is
+already listed, skip this section.
 
-1. Click the **☰** menu in the upper-left corner, click **Projects**, and then
-   click **All projects**.
-
-2. In the list of projects, click your project. Its name starts with
-   `wxdi-auto-demo-`.
-
-    ![Open your project](../assets/screens/lab/2-3b-open-project.png){ .screenshot }
-
-3. Click the **Assets** tab.
-
-    ![The Assets tab](../assets/screens/lab/2-3c-assets-tab.png){ .screenshot }
-
-4. Under **Asset types**, click **Flows**.
-
-    ![The Flows asset type](../assets/screens/lab/2-3d-flows-filter.png){ .screenshot }
-
-**Check your progress:** the four lab flows are listed.
-
-![The four lab flows](../assets/screens/lab/2-3e-four-flows.png){ .screenshot }
-
-- **Marketing Performance - DRAFT** and **Storefront Live - DRAFT** are the
-  starting flows. You run them first, in parts 3 and 4.
-- **Marketing Performance - COMPLETED** and **Storefront Live - COMPLETED**
-  are the finished flows. You explore and run them next. They answer the
-  business questions.
-
-> **Explainer - Projects, flows and jobs**
-> A **project** is a shared team workspace that contains flows, connections and
-> jobs. A **flow** is the design of a pipeline: the data to read, the
-> processing to apply and the destination to write to. A **job** is a flow
-> prepared to run on an engine. Each execution of a job produces a **run**,
-> which has its own log and metrics.
-
-### 2.3 Create a task credential
-
-Jobs run under your own identity through a **task credential**. You create a
-task credential once per account.
-
-> **Explainer - Task credentials**
-> A job can continue to run after you close your browser, so it cannot use
-> your browser session. A **task credential** is an API key that the platform
-> stores and uses whenever one of your jobs runs. Without a task credential, a
-> run fails before it starts with the message *"Missing user API key: A user
-> API key is required to run a job."*
+!!! explainer "Task credentials"
+    A job can continue to run after you close your browser, so it cannot use
+    your browser session. A **task credential** is an API key that the platform
+    stores and uses whenever one of your jobs runs. Without a task credential, a
+    run fails before it starts with the message *"Missing user API key: A user
+    API key is required to run a job."*
 
 1. Click the **profile** icon in the upper-right corner (A), then click
    **Profile and settings** (B).
@@ -199,6 +164,72 @@ task credential once per account.
 
 ![The task credential](../assets/screens/lab/2-4e-credential-created.png){ .screenshot }
 
+### 2.3 Open your project
+
+Your environment is prepared before the session: the lab data, the simulated
+website traffic and four flows are already in your project.
+
+1. Click the **☰** menu in the upper-left corner, click **Projects**, and then
+   click **All projects**.
+
+2. In the list of projects, click your project. Its name starts with
+   `wxdi-auto-demo-`.
+
+    !!! warning "Do not use the project LAB-1861 Unstructured Data"
+        Your account also contains a project named **LAB-1861 Unstructured
+        Data**. It belongs to another lab. Ignore it: everything in this lab
+        happens in the project whose name starts with `wxdi-auto-demo-`.
+
+    ![Open your project](../assets/screens/lab/2-3b-open-project.png){ .screenshot }
+
+3. Click the **Assets** tab.
+
+    ![The Assets tab](../assets/screens/lab/2-3c-assets-tab.png){ .screenshot }
+
+4. Under **Asset types**, click **Flows**.
+
+    ![The Flows asset type](../assets/screens/lab/2-3d-flows-filter.png){ .screenshot }
+
+**Check your progress:** the four lab flows are listed.
+
+![The four lab flows](../assets/screens/lab/2-3e-four-flows.png){ .screenshot }
+
+- **Marketing Performance - DRAFT** and **Storefront Live - DRAFT** are the
+  starting flows. You run them first, in parts 3 and 4.
+- **Marketing Performance - COMPLETED** and **Storefront Live - COMPLETED**
+  are the finished flows. You explore and run them next. They answer the
+  business questions.
+
+!!! explainer "Projects, flows and jobs"
+    A **project** is a shared team workspace that contains flows, connections and
+    jobs. A **flow** is the design of a pipeline: the data to read, the
+    processing to apply and the destination to write to. A **job** is a flow
+    prepared to run on an engine. Each execution of a job produces a **run**,
+    which has its own log and metrics.
+
+### 2.4 The data sources in your project
+
+Your project already contains a **connection** for each data source. The
+flows use them to read and write data.
+
+- **demo_conn_postgres** connects to the Summit order system in PostgreSQL:
+  90 days of orders in the table `shop.orders_history`. On the canvas, the
+  stage **Daily_orders** reads it.
+- **demo_conn_mysql** connects to the marketing team's MySQL database and its
+  campaign catalogue, table `campaigns`. The stage **Campaign_catalogue**
+  reads it.
+- The file **ad_spend.csv**, the daily export from the advertising platforms,
+  sits on the local disk of the batch engine. The stage **Ad_spend_export**
+  reads it.
+- The Kafka topics **shop.clicks** and **shop.orders** carry the live website
+  events. The stages **Storefront clicks** and **Storefront orders** read them.
+
+!!! explainer "Connections"
+    A **connection** is a saved, reusable set of credentials for a data
+    source, stored in the project. A flow refers to the connection instead of
+    a password. The engine uses the connection to reach the data from where
+    the engine runs, so the data never travels to IBM Cloud.
+
 ## 3 Batch: which campaigns pay for themselves?
 
 The marketing team invests in five channels and needs to know where to
@@ -210,103 +241,104 @@ sources in three formats.
 joins two sources. You then explore and run the finished flow, which adds the
 third source, the calculations and the database target.
 
-> **Explainer - Stages and links**
-> Each box on the canvas is a **stage**. A stage is a source that reads data, a
-> processing step that transforms data, or a target that writes data. The
-> arrows are **links**, which carry rows from one stage to the next. After a
-> run, each link displays the number of rows that passed through it.
+!!! explainer "Stages and links"
+    Each box on the canvas is a **stage**. A stage is a source that reads data, a
+    processing step that transforms data, or a target that writes data. The
+    arrows are **links**, which carry rows from one stage to the next. After a
+    run, each link displays the number of rows that passed through it.
 
-### 3.1 Run the starting flow
-
-The **Marketing Performance - DRAFT** flow already combines the first two
-sources:
-
-- **Daily_orders** reads the order system (PostgreSQL) and totals orders and
-  revenue per campaign, per day.
-- **Ad_spend_export** reads the CSV file from the advertising platforms
-  directly from the local disk of the engine. The file remains on the server
-  that received it.
-- **Join_on_campaign_and_day** matches the orders for each day with the spend
-  for the same day.
-- **Daily_performance_csv** writes the result to a CSV file.
-
-In the following steps, you open the flow, examine the first two sources and
-run the flow.
+### 3.1 Run the starting flow with preview
 
 1. In the list of flows in your project, click **Marketing Performance -
    DRAFT**. The flow opens on the canvas.
 
-    ![Open the starting flow](../assets/screens/lab/3-1a-open-draft.png){ .screenshot }
+    ![The starting flow](../assets/screens/lab/3-1a-open-draft.png){ .screenshot }
 
-2. Double-click **Daily_orders**. The stage settings open.
+**Check your progress:** the canvas shows four stages.
 
-    ![The starting batch flow](../assets/screens/lab/3-1b-draft-canvas.png){ .screenshot }
+![The starting batch flow](../assets/screens/lab2/3-1a-draft-canvas.png){ .screenshot }
 
-3. Scroll to the bottom of the **Stage** tab and click **Preview data**.
+The flow already combines the first two sources:
 
-    ![Preview data](../assets/screens/lab/3-1c-orders-preview-button.png){ .screenshot }
+- **Daily_orders** reads the order system in PostgreSQL and totals the orders
+  and the revenue per campaign, per day.
+- **Ad_spend_export** reads the CSV export from the advertising platforms
+  directly from the local disk of the engine. The file never leaves the
+  server that received it.
+- **Join_on_campaign_and_day** matches the orders of each day with the
+  advertising spend of the same day.
+- **Daily_performance_csv** writes the result to a CSV file.
 
-4. Review the orders and revenue per campaign, per day, read directly from the
-   order system: 720 rows, representing 8 campaigns over 90 days. Click
-   **Close**.
+!!! explainer "Stages and links"
+    Each box on the canvas is a **stage**: a source that reads data, a
+    processing step that transforms it, or a target that writes it. The
+    arrows are **links**, which carry rows from one stage to the next. After a
+    run, each link shows how many rows passed through it.
 
-    ![Orders by campaign and day](../assets/screens/lab/3-1d-orders-preview.png){ .screenshot }
+!!! explainer "What happens when you run a flow"
+    A flow is a design. Before an engine can run it, the design is
+    **compiled**: translated into the program that the batch engine executes.
+    The run is then queued as a **job**. Your remote engine picks up the job,
+    reads the data next to it, and sends back only the status, the log and
+    the row counts. **Run with preview** does the same, and also keeps a
+    sample of the rows on every link so that you can inspect them.
 
-5. Click **Cancel** to close the stage settings.
+2. Click the arrow next to **Run** (A), and then click **Run with preview**
+   (B). The flow is compiled and runs on your remote engine. The run takes
+   about one minute.
 
-    ![Cancel](../assets/screens/lab/3-1d2-cancel.png){ .screenshot }
+    ![Run with preview](../assets/screens/lab2/3-1b-run-menu.png){ .screenshot }
 
-6. Double-click **Ad_spend_export**.
+3. Wait until the green banner shows **Run successful.**
 
-    ![Open Ad_spend_export](../assets/screens/lab/3-1e0-open-adspend.png){ .screenshot }
+    ![Run successful](../assets/screens/lab2/3-1c-run-done.png){ .screenshot }
 
-7. Click the **Output** tab. The tab lists the columns of the daily CSV file
-   from the advertising platforms: date, campaign, impressions, clicks and
-   spend.
+4. Click **Show bottom panel** in the toolbar. The panel opens below the
+   canvas.
 
-    ![The CSV file's columns](../assets/screens/lab/3-1e-adspend-columns.png){ .screenshot }
+    ![Show bottom panel](../assets/screens/lab2/3-1d-bottom-panel.png){ .screenshot }
 
-8. Click **Cancel**.
+5. On the canvas, click **Join_on_campaign_and_day** once (A). The panel shows
+   the rows that went into the join on the left (B) and the rows that came out
+   on the right (C). The input on the left is **orders_by_day**: orders and
+   revenue per campaign, per day, read from the order system.
 
-    ![Cancel](../assets/screens/lab/3-1e2-cancel.png){ .screenshot }
+    ![The join's input and output](../assets/screens/lab2/3-1e-join-orders.png){ .screenshot }
 
-9. Click **Compile** in the toolbar.
+6. Click the **orders_by_day** list under **Input** (A), and then click
+   **spend_by_day** (B).
 
-    > **Explainer - Compile and run**
-    > **Compile** converts your design into the program that the batch
-    > engine runs. **Run flow** then creates a job and submits it to the engine.
-    > Both operations take place on your remote engine, not in IBM Cloud. The
-    > engine retrieves the work and processes it next to your data.
+    ![Switch the input](../assets/screens/lab2/3-1f-input-menu.png){ .screenshot }
 
-    ![Compile](../assets/screens/lab/3-1f-compile.png){ .screenshot }
+**Check your progress:** the left side now shows **spend_by_day** (A): the
+impressions, clicks and spend per campaign, per day, read from the CSV export
+(B). The output on the right combines both inputs: one row per campaign per
+day, with orders, revenue, impressions, clicks and spend side by side.
 
-10. Wait until the green **Compile successful** banner appears, then click
-    **Run flow** in the banner. The run takes approximately one minute.
+![The marketing spend by day](../assets/screens/lab2/3-1g-join-spend.png){ .screenshot }
 
-    ![Run flow](../assets/screens/lab/3-1g-compiled-run-flow.png){ .screenshot }
+### 3.2 Prepare for a changing export file
 
-11. Wait until the green **Run successful** banner appears, then click
-    **View log**.
+The advertising platforms sometimes add a column to their daily export
+without notice, for example a new **video_views** column. A pipeline that
+lists every column by hand would need an update each time. **Runtime column
+propagation** handles this automatically.
 
-    ![Run successful](../assets/screens/lab/3-1h-run-successful.png){ .screenshot }
+!!! explainer "Runtime column propagation"
+    By default, a stage passes on only the columns that are defined in it.
+    With **runtime column propagation (RCP)**, a stage also passes on the
+    columns that it finds at run time but that are not defined in it. A new
+    column in the export then flows through the pipeline without anyone
+    editing the flow.
 
-12. Locate line 5 of the log. The line contains `-n=dse-`, followed by eight
-    characters and `_runtime`. This value is the name of your remote engine. It
-    confirms that the job ran on your server, next to the data, and not in IBM
-    Cloud.
+1. Click **Hide bottom panel**. On the canvas, double-click
+   **Ad_spend_export**, and then click the **Output** tab.
+2. Under **Columns**, select **Runtime column propagation** (A). Click
+   **Save** (B).
 
-    ![The run log](../assets/screens/lab/3-1i-run-log.png){ .screenshot }
+    ![Turn on runtime column propagation](../assets/screens/lab2/3-1h-rcp.png){ .screenshot }
 
-**Check your progress:** close the log by clicking the **X** in the upper-right
-corner of the log panel. On the canvas, the links **orders_by_day**,
-**spend_by_day** and the join output **daily_performance** each display **720
-rows**: one row per campaign per day.
-
-![Close the log](../assets/screens/lab/3-2a0-close-log.png){ .screenshot }
-
-![720 rows on every link](../assets/screens/lab/3-1j-row-counts.png){ .screenshot }
-
-### 3.2 Explore and run the finished flow
+### 3.3 Explore and run the finished flow
 
 The finished flow, **Marketing Performance - COMPLETED**, contains the
 starting flow and four more stages. Together they answer the marketing
@@ -337,53 +369,80 @@ the flow. You do not need to change anything.
 
     ![The lookup on campaign_id](../assets/screens/lab/3-2c-lookup-key.png){ .screenshot }
 
-    > **Explainer - Lookups**
-    > A **Lookup** stage adds details to each row from a reference table. The
-    > solid link carries the rows to enrich. The dashed **reference** link
-    > carries the table that supplies the details. The **key** is the column
-    > that both inputs share.
+    !!! explainer "Lookups"
+        A **Lookup** stage adds details to each row from a reference table. The
+        solid link carries the rows to enrich. The dashed **reference** link
+        carries the table that supplies the details. The **key** is the column
+        that both inputs share.
 
-5. Double-click **Marketing_KPIs**, and then click the **Output** tab (A).
-   Scroll down the **Output** list to the last three columns (B). This
-   **Transformer** stage calculates three metrics per campaign, per day:
-    - **roas**: return on ad spend, which is revenue divided by spend. A value
-      of 3.0 means that every $1 of advertising generated $3 of sales.
-    - **cpa_usd**: cost per acquisition, which is the advertising cost of each
-      order.
-    - **ctr_pct**: click-through rate, which is the percentage of ad
-      impressions that resulted in a click.
+5. Double-click **Marketing_KPIs**, and then click the **Output** tab. This
+   **Transformer** stage calculates metrics per campaign, per day. Scroll to
+   the end of the **Output** list. Two metrics are already there:
+    - **roas**: return on ad spend (ROAS), which is revenue divided by spend. A
+      value of 3.0 means that every $1 of advertising generated $3 of sales.
+    - **cpa_usd**: cost per acquisition (CPA), which is the advertising cost of
+      each order.
 
-    Click **Cancel**.
+    The third metric, the click-through rate (CTR), is missing. You add it
+    now.
 
-    ![The three metrics](../assets/screens/lab/3-2d-kpis-output.png){ .screenshot }
+    !!! explainer "Derivations"
+        Each output column of a Transformer has a **derivation**: a formula
+        built from the input columns, written as `<input link>.<column>`. The
+        input link of this stage is **with_campaign**. `If ... Then ... Else`
+        protects against a division by zero on a day without impressions.
 
-6. Double-click **Campaign_performance_table**. This stage loads the results
+6. Click **Add column** (A). A new row named **COLUMN_1** appears at the end
+   of the list (B).
+
+    ![Add a column](../assets/screens/lab2/3-2g-add-column.png){ .screenshot }
+
+7. Double-click **COLUMN_1** and type `ctr_pct` (A). Then double-click the
+   empty **Derivation** cell of the same row, type the following formula, and
+   press **Enter** (B):
+
+    ```text
+    If with_campaign.impressions > 0 Then 100.0 * with_campaign.clicks / with_campaign.impressions Else 0
+    ```
+
+    ![Name and derivation](../assets/screens/lab2/3-2h-ctr-derivation.png){ .screenshot }
+
+8. Click the **Data type** cell of the row and select **DOUBLE**.
+
+**Check your progress:** the row **ctr_pct** shows your derivation and the
+type **DOUBLE** (A). Click **Save and return** (B).
+
+![The CTR column](../assets/screens/lab2/3-2i-ctr-row.png){ .screenshot }
+
+9. Double-click **Campaign_performance_table**. This stage loads the results
    into the PostgreSQL table **shop.campaign_performance**, which the
    marketing team reads its reports from. Each run empties the table first,
    so repeated runs do not duplicate rows. Click **Cancel**.
 
     ![The results table](../assets/screens/lab/3-2e-target-table.png){ .screenshot }
 
-7. Click **Compile** in the toolbar.
+10. Click **Compile** in the toolbar. Compiling turns the flow, now with your
+    new column, into the program that the engine runs.
 
     ![Compile](../assets/screens/lab/3-1f-compile.png){ .screenshot }
 
-8. Wait until the green **Compile successful** banner appears, then click
-   **Run flow** in the banner. The run takes approximately one minute.
+11. Wait until the green **Compile successful** banner appears, then click
+    **Run flow** in the banner. The run takes about one minute.
 
 **Check your progress:** the banner displays **Run successful** (A). The link
-into **Campaign_performance_table** displays **720 rows** (B), the same count
-as the join. The dashed link from the campaign catalogue displays **8 rows**.
+into **Campaign_performance_table** shows about **720 rows** (B), one per
+campaign per day. The dashed link from the campaign catalogue shows **8
+rows**, one per campaign.
 
-![The finished batch flow](../assets/screens/lab/3-2f-run-successful.png){ .screenshot }
+![The finished batch flow](../assets/screens/lab2/3-2j-run-successful.png){ .screenshot }
 
-> **Explainer - Three sources, three formats, one engine**
-> The flow reads from PostgreSQL, MySQL and a CSV file. The batch engine
-> connects to each source locally through the connections in your project. The
-> flow does not specify *where* it runs. The same flow can run on an engine in
-> another cloud, next to the data in that cloud.
+!!! explainer "Three sources, three formats, one engine"
+    The flow reads from PostgreSQL, MySQL and a CSV file. The batch engine
+    connects to each source locally through the connections in your project. The
+    flow does not specify *where* it runs. The same flow can run on an engine in
+    another cloud, next to the data in that cloud.
 
-### 3.3 Review the results
+### 3.4 Review the results
 
 The table now contains one row per campaign per day, including the three
 metrics that the flow calculated. In this section, you review the results from the
@@ -436,7 +495,7 @@ prospecting returns approximately 50 cents for every $1 spent, so its verdict
 is *cut*. This result is the recommendation for the marketing team. In
 part 4, you apply it to live data.
 
-### 3.4 Monitor your remote engine
+### 3.5 Monitor your remote engine
 
 Your jobs ran on the batch engine in your environment, not in IBM Cloud. In
 this section, you monitor the engine from the project while it processes a
@@ -540,42 +599,42 @@ plane (03).
 that joins carts to orders. You then explore and run the finished flow, which
 adds the totals per campaign and the verdict from part 3.
 
-> **Explainer - Kafka topics and events**
-> The website sends every click and every order to **Kafka** as an **event**:
-> a small JSON message sent at the moment the action occurs. Events of the same
-> type are written to the same **topic**, such as `shop.clicks` and
-> `shop.orders`. A streaming flow reads a topic continuously and processes each
-> event as it arrives, so the results are only seconds old.
+!!! explainer "Kafka topics and events"
+    The website sends every click and every order to **Kafka** as an **event**:
+    a small JSON message sent at the moment the action occurs. Events of the same
+    type are written to the same **topic**, such as `shop.clicks` and
+    `shop.orders`. A streaming flow reads a topic continuously and processes each
+    event as it arrives, so the results are only seconds old.
 
-> **Explainer - Apache Flink in five ideas**
-> **A stream is unbounded.** A batch job reads a table and then completes. A
-> Flink job runs continuously and processes each event as it arrives.
->
-> **Event time.** Every event carries the time at which it occurred (here
-> `event_ts`). Flink uses this time instead of the arrival time, so a late
-> click is still assigned to the correct minute.
->
-> **Watermarks.** Flink cannot wait indefinitely for late events. A
-> **watermark** is the point in event time up to which Flink considers all
-> events received. Here, the watermark is 10 seconds behind the newest event.
-> When the watermark passes the end of a window, Flink closes the window and
-> emits its result.
->
-> **Windows.** To aggregate a stream, Flink divides it into time intervals. A
-> **tumbling window** is a sequence of consecutive, non-overlapping intervals,
-> here 5 minutes each. Every event belongs to exactly one interval.
->
-> **State and checkpoints.** While a window is open, Flink holds the running
-> totals in memory. This data is called **state**. Flink saves the state at
-> regular intervals; each save is a **checkpoint**. If the job stops, it
-> resumes from the last checkpoint.
+!!! explainer "Apache Flink in five ideas"
+    **A stream is unbounded.** A batch job reads a table and then completes. A
+    Flink job runs continuously and processes each event as it arrives.
 
-> **Explainer - The streaming engine**
-> The streaming engine runs streaming flows as Apache
-> Flink jobs on a Flink cluster in your own environment, next to Kafka. You
-> design the flow on the same type of canvas as other flows in your project.
-> Flink handles windows, joins between two live streams, and late or
-> out-of-order events.
+    **Event time.** Every event carries the time at which it occurred (here
+    `event_ts`). Flink uses this time instead of the arrival time, so a late
+    click is still assigned to the correct minute.
+
+    **Watermarks.** Flink cannot wait indefinitely for late events. A
+    **watermark** is the point in event time up to which Flink considers all
+    events received. Here, the watermark is 10 seconds behind the newest event.
+    When the watermark passes the end of a window, Flink closes the window and
+    emits its result.
+
+    **Windows.** To aggregate a stream, Flink divides it into time intervals. A
+    **tumbling window** is a sequence of consecutive, non-overlapping intervals,
+    here 5 minutes each. Every event belongs to exactly one interval.
+
+    **State and checkpoints.** While a window is open, Flink holds the running
+    totals in memory. This data is called **state**. Flink saves the state at
+    regular intervals; each save is a **checkpoint**. If the job stops, it
+    resumes from the last checkpoint.
+
+!!! explainer "The streaming engine"
+    The streaming engine runs streaming flows as Apache
+    Flink jobs on a Flink cluster in your own environment, next to Kafka. You
+    design the flow on the same type of canvas as other flows in your project.
+    Flink handles windows, joins between two live streams, and late or
+    out-of-order events.
 
 ### 4.1 Run the starting flow
 
@@ -619,11 +678,11 @@ In the following steps, you open the flow, examine the join and run the flow.
 
     ![The join's time limit](../assets/screens/lab/4-1c2-join-window.png){ .screenshot }
 
-    > **Explainer - Joining two live streams**
-    > A database join compares two static tables. A **Stream Join** compares
-    > two continuous streams, so it requires a time limit. When the 5-minute
-    > limit expires, each cart without a matching order is emitted with empty
-    > order fields.
+    !!! explainer "Joining two live streams"
+        A database join compares two static tables. A **Stream Join** compares
+        two continuous streams, so it requires a time limit. When the 5-minute
+        limit expires, each cart without a matching order is emitted with empty
+        order fields.
 
 6. Click the **Validate** checkmark in the toolbar. Validation checks every
    stage before the flow is submitted to the engine.
@@ -702,11 +761,11 @@ the flow running.
 
     ![Your job on Flink](../assets/screens/lab/4-1n-flink-job.png){ .screenshot }
 
-    > **Explainer - One flow, one Flink job**
-    > When you click **Run**, the streaming engine converts
-    > your flow into a Flink job and starts a dedicated Flink cluster for it,
-    > next to Kafka. Each box in the graph is an **operator** that is generated
-    > from your stages. When you stop the flow, the cluster is removed.
+    !!! explainer "One flow, one Flink job"
+        When you click **Run**, the streaming engine converts
+        your flow into a Flink job and starts a dedicated Flink cluster for it,
+        next to Kafka. Each box in the graph is an **operator** that is generated
+        from your stages. When you stop the flow, the cluster is removed.
 
 10. Switch to the browser tab that contains the **Storefront Live - DRAFT**
     flow. Keep the Control Center tab open; you return to it in section 4.4.
@@ -756,12 +815,12 @@ run the flow.
 
     ![The scorecard query](../assets/screens/lab/4-3d-verdict-query.png){ .screenshot }
 
-    > **Explainer - Batch results in a live stream**
-    > The **JDBC Lookup** stage queries a database for each record that passes
-    > through it. JDBC is the standard interface that Java programs use to
-    > access databases. The batch flow processes 90 days of history once a
-    > day, and the streaming flow reuses that result in milliseconds for every
-    > record.
+    !!! explainer "Batch results in a live stream"
+        The **JDBC Lookup** stage queries a database for each record that passes
+        through it. JDBC is the standard interface that Java programs use to
+        access databases. The batch flow processes 90 days of history once a
+        day, and the streaming flow reuses that result in milliseconds for every
+        record.
 
 7. Click the **Validate** checkmark in the toolbar. Verify that the banner
    displays **Validation successful, no issues found**.
@@ -933,11 +992,11 @@ owner, in its own MySQL database. In this section, you add those details with a
 
     ![Connect the campaigns table](../assets/screens/lab/3-2g-connect-campaigns.png){ .screenshot }
 
-    > **Explainer - Lookups**
-    > A **Lookup** stage adds details to each row from a reference table. The
-    > solid link carries the rows to enrich. The dashed **reference** link
-    > carries the table that supplies the details. The **key** is the column
-    > that both inputs share, in this case `campaign_id`.
+    !!! explainer "Lookups"
+        A **Lookup** stage adds details to each row from a reference table. The
+        solid link carries the rows to enrich. The dashed **reference** link
+        carries the table that supplies the details. The **key** is the column
+        that both inputs share, in this case `campaign_id`.
 
 8. Double-click **Lookup_1**.
 
@@ -974,11 +1033,11 @@ owner, in its own MySQL database. In this section, you add those details with a
 
 ![The Lookup done](../assets/screens/lab/3-2n-lookup-done.png){ .screenshot }
 
-> **Explainer - Three sources, three formats, one engine**
-> The flow now reads from PostgreSQL, MySQL and a CSV file. The batch engine
-> connects to each source locally through the connections in your project. The
-> flow does not specify *where* it runs. The same flow can run on an engine in
-> another cloud, next to the data in that cloud.
+!!! explainer "Three sources, three formats, one engine"
+    The flow now reads from PostgreSQL, MySQL and a CSV file. The batch engine
+    connects to each source locally through the connections in your project. The
+    flow does not specify *where* it runs. The same flow can run on an engine in
+    another cloud, next to the data in that cloud.
 
 ### A.2 Calculate return on ad spend
 
@@ -991,11 +1050,11 @@ the marketing team's question:
 - **Click-through rate (CTR)** is the percentage of ad impressions that
   resulted in a click.
 
-> **Explainer - Transformer and derivations**
-> A **Transformer** stage calculates new columns. Each new column has a
-> **derivation**: a formula based on the incoming columns, written as
-> `<link name>.<column>`. The `If … Then … Else` expression prevents a division
-> by zero on a day with no spend or no orders.
+!!! explainer "Transformer and derivations"
+    A **Transformer** stage calculates new columns. Each new column has a
+    **derivation**: a formula based on the incoming columns, written as
+    `<link name>.<column>`. The `If … Then … Else` expression prevents a division
+    by zero on a day with no spend or no orders.
 
 1. In **Find palette nodes**, enter `Transformer`. Drag the **Transformer** (A)
    and drop it on the link between **Lookup_1** and **Daily_performance_csv**
@@ -1203,13 +1262,13 @@ campaign that returns $10 for every $1 does. Your batch flow calculated
 this assessment in part 3. In this part, you connect the batch and
 streaming portions of the lab by adding the verdict to every live result.
 
-> **Explainer - Batch results in a live stream**
-> The **JDBC Lookup** stage queries a database for each record that passes
-> through it. JDBC is the standard interface that Java programs use to access
-> databases. In this flow, the stage reads the campaign scorecard that your
-> batch flow wrote to PostgreSQL. The batch flow processes 90 days of history
-> once a day, and the streaming flow reuses that result in milliseconds for
-> every record.
+!!! explainer "Batch results in a live stream"
+    The **JDBC Lookup** stage queries a database for each record that passes
+    through it. JDBC is the standard interface that Java programs use to access
+    databases. In this flow, the stage reads the campaign scorecard that your
+    batch flow wrote to PostgreSQL. The batch flow processes 90 days of history
+    once a day, and the streaming flow reuses that result in milliseconds for
+    every record.
 
 1. In **Find stages**, enter `JDBC`. Drag the **JDBC Lookup** listed under
    **Processors** (A) to the empty area above the flow (B).
