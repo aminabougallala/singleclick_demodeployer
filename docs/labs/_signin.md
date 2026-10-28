@@ -52,3 +52,7 @@ your TechZone account, whose name starts with `itz-saas-` (A), and the region
 **Toronto** (B). Keep this tab open. You use it for the rest of the lab.
 
 ![The home page after sign-in](../assets/screens/signin/signin-6-home.png){ .screenshot }
+
+!!! tip "A page shows Something went wrong or 429 Too many requests?"
+    The platform limits how many requests one account can send in a short
+    time. Wait one minute, and then reload the page. Your work is not lost.
