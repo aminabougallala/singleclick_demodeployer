@@ -89,28 +89,15 @@ location.
 
 ```mermaid
 flowchart LR
-  subgraph IBM["IBM Cloud: control plane"]
-    P["Your project<br/>flows, jobs, connections"]
+  C["IBM Cloud<br/>you design the flows"]
+  subgraph E["Your environment"]
+    R["Remote engine"] --- D[("Your data")]
   end
-  subgraph YOU["Your environment: data plane"]
-    BE["Remote batch engine"]
-    SE["Streaming engine<br/>(Apache Flink)"]
-    PG[("PostgreSQL<br/>order system")]
-    MY[("MySQL<br/>marketing catalogue")]
-    CSV["ad_spend.csv<br/>ad platform exports"]
-    K[["Kafka<br/>website clicks and orders"]]
-  end
-  BE -- polls for work --> P
-  SE -- polls for work --> P
-  BE --- PG
-  BE --- MY
-  BE --- CSV
-  SE --- K
-  SE --- PG
+  R -- "picks up the work" --> C
 ```
 
-*The engines call out to the control plane for work and read the data next
-to them. No data leaves your environment.*
+*You design in IBM Cloud. The engine in your environment picks up the work
+and processes the data where it is.*
 
 ## 2 Getting started
 
@@ -348,20 +335,20 @@ the flow. You do not need to change anything.
 1. In the breadcrumb at the top of the page, click the name of your project.
    Then click **Marketing Performance - COMPLETED** in the list of flows. The
    flow opens on the canvas.
-2. Locate the four stages that the starting flow does not contain:
+2. **Review only: you do not change anything in this step.** Locate the four stages that the starting flow does not contain:
    **Campaign_catalogue** (A), **Add_campaign_details** (B),
    **Marketing_KPIs** (C) and **Campaign_performance_table** (D).
 
     ![The finished flow](../assets/screens/lab/3-2a-completed-canvas.png){ .screenshot }
 
-3. Double-click **Campaign_catalogue**, and then click the **Output** tab (A).
+3. **Review only: you do not change anything in this step.** Double-click **Campaign_catalogue**, and then click the **Output** tab (A).
    This stage reads the campaign catalogue from the marketing team's MySQL
    database: the name, channel, objective and owner of each campaign (B).
    Click **Cancel**.
 
     ![The campaign catalogue](../assets/screens/lab/3-2b-catalogue-output.png){ .screenshot }
 
-4. Double-click **Add_campaign_details**. This **Lookup** stage adds the
+4. **Review only: you do not change anything in this step.** Double-click **Add_campaign_details**. This **Lookup** stage adds the
    catalogue details to each row of the join. The **Key expression** is
    **campaign_id** (A), the column that both inputs share. **Lookup failure**
    is set to **Continue** (B), so a day with an unknown campaign is kept
@@ -414,7 +401,7 @@ type **DOUBLE** (A). Click **Save and return** (B).
 
 ![The CTR column](../assets/screens/lab2/3-2i-ctr-row.png){ .screenshot }
 
-9. Double-click **Campaign_performance_table**. This stage loads the results
+9. **Review only: you do not change anything in this step.** Double-click **Campaign_performance_table**. This stage loads the results
    into the PostgreSQL table **shop.campaign_performance**, which the
    marketing team reads its reports from. Each run empties the table first,
    so repeated runs do not duplicate rows. Click **Cancel**.
@@ -520,7 +507,7 @@ engine.
 
     ![Remote environments](../assets/screens/lab/3-5a3-remote-environments-tab.png){ .screenshot }
 
-5. Review the details of your remote engine: version, status, uptime, and CPU,
+5. **Review only: you do not change anything in this step.** Review the details of your remote engine: version, status, uptime, and CPU,
    memory (RAM) and disk usage. When the engine is idle, its CPU usage is close
    to 0%.
 
@@ -660,19 +647,19 @@ In the following steps, you open the flow, examine the join and run the flow.
 
     ![Open the streaming flow](../assets/screens/lab/4-1a-open-draft.png){ .screenshot }
 
-3. Click **Did the cart become an order?** once. The stage settings open on
+3. **Review only: you do not change anything in this step.** Click **Did the cart become an order?** once. The stage settings open on
    the right.
 
     ![The starting streaming flow](../assets/screens/lab/4-1b-draft-canvas.png){ .screenshot }
 
-4. Review the **Join Type**, **LEFT** (A), and the **Join Keys**,
+4. **Review only: you do not change anything in this step.** Review the **Join Type**, **LEFT** (A), and the **Join Keys**,
    **/session_id** on both sides (B). A **LEFT** join retains every cart,
    including carts without an order. Carts without an order are the abandoned
    carts.
 
     ![The Stream Join](../assets/screens/lab/4-1c-stream-join.png){ .screenshot }
 
-5. Click **Window**. **Window Size** is 300000 milliseconds (5 minutes). A cart
+5. **Review only: you do not change anything in this step.** Click **Window**. **Window Size** is 300000 milliseconds (5 minutes). A cart
    and its order must occur within 5 minutes of each other to match. Click
    **Cancel**.
 
@@ -785,12 +772,12 @@ run the flow.
 2. In the breadcrumb at the top of the page, click the name of your project.
    Then click **Storefront Live - COMPLETED** in the list of flows. The flow
    opens on the canvas.
-3. Locate the two stages that the starting flow does not contain: **Cart
+3. **Review only: you do not change anything in this step.** Locate the two stages that the starting flow does not contain: **Cart
    value by campaign** (A) and **Campaign verdict** (B).
 
     ![The finished streaming flow](../assets/screens/lab/4-3a-completed-stream.png){ .screenshot }
 
-4. Click **Cart value by campaign** once. The stage settings open on the
+4. **Review only: you do not change anything in this step.** Click **Cart value by campaign** once. The stage settings open on the
    right. This **Windowing Aggregator** stage uses a **TUMBLING** window of
    **300000** milliseconds, which is 5 minutes (A). **Grouping** is set to
    **/cart_campaign_id** (B), so the stage emits one result per campaign
@@ -798,7 +785,7 @@ run the flow.
 
     ![The window and the grouping](../assets/screens/lab/4-3b-window-grouping.png){ .screenshot }
 
-5. Expand **Aggregations**. The three entries calculate the **number** of
+5. **Review only: you do not change anything in this step.** Expand **Aggregations**. The three entries calculate the **number** of
    carts (**carts**), the **total value** of those carts (**cart_value**), and
    the **total of the matching orders** (**converted_revenue**). An abandoned
    cart has an empty order total, so it adds to the cart value but not to the
@@ -806,7 +793,7 @@ run the flow.
 
     ![The three totals](../assets/screens/lab/4-3c-aggregations.png){ .screenshot }
 
-6. Click **Campaign verdict** once. This **JDBC Lookup** stage queries the
+6. **Review only: you do not change anything in this step.** Click **Campaign verdict** once. This **JDBC Lookup** stage queries the
    campaign scorecard in PostgreSQL for each result (A). The scorecard is a
    view over the table that your batch flow loaded in part 3. **Missing Values
    Behavior** is set to **Pass the record along the pipeline unchanged** (B),
